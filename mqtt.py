@@ -35,7 +35,7 @@ def init(sched: Scheduler):
             else:
                 print("[MQTT] Connected without persistent session")
             _publish_birth_msg()
-            sched.schedule_periodic(Heartbeat(), 10 * 60)
+            sched.schedule_periodic(Heartbeat(), MQTT_HEARTBEAT_INTERVAL)
             break
         except OSError:
             print("[MQTT] Connecting...")
