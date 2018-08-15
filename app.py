@@ -3,13 +3,13 @@ import utime as time
 import hass
 import mqtt
 from config import *
-from hass import Thermostat as HassThermostat
+from hass import ThermostatAPI as HassThermostatAPI
 from thingflow import Scheduler
 
 
 def main():
     hass_api = hass.API(HASS_BASE_URL, api_password=HASS_PASSWORD)
-    hass_thermo = HassThermostat(hass_api, HASS_THERMOSTAT_ID)
+    hass_thermo = HassThermostatAPI(hass_api, HASS_THERMOSTAT_ID)
     sched = Scheduler()
 
     cur_state = hass_thermo.get_state()

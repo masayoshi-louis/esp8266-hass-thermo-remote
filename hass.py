@@ -93,7 +93,7 @@ def call_service(api: API, domain: str, service: str, service_data=None) -> bool
         return False
 
 
-class Thermostat:
+class ThermostatAPI:
     __slots__ = ['id', 'api']
 
     def __init__(self, api: API, entity_id):
