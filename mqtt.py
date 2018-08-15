@@ -30,7 +30,7 @@ def _hass_register_device(domain: str, sub_id: str, data):
     print("[MQTT] Sending device config for {}/{}".format(domain, sub_id))
     print("[MQTT] \ttopic:", topic)
     print("[MQTT] \tdata:", data_str)
-    # client.publish(topic, data_str.encode(), retain=True)
+    client.publish(topic, data_str.encode(), retain=True)
 
 
 class HassMQTTDevice:
