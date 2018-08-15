@@ -14,3 +14,6 @@ def main():
     print("[HASS] Connected")
 
     mqtt.init()
+
+    # test
+    mqtt.HassMQTTTemperatureSensor().register({})

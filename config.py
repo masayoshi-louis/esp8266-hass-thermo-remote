@@ -8,5 +8,8 @@ MQTT_HOST = '10.0.100.154'
 MQTT_PORT = 1883
 MQTT_USER = None
 MQTT_PASSWORD = None
+MQTT_KEEPALIVE = 120  # seconds
 
 HOSTNAME = 'test-thermostat-remote'
+
+TEMPERATURE_UNIT = '°C'
