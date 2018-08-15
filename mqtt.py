@@ -9,7 +9,7 @@ from umqtt.robust import MQTTClient
 gc.collect()
 
 from config import *
-from thingflow import Scheduler, OutputThing
+from thingflow import Scheduler, OutputThing, Output
 
 client = None
 STATUS_TOPIC = None
@@ -94,13 +94,16 @@ class HassMQTTDevice:
         raise NotImplementedError
 
 
-class HassMQTTSensor(HassMQTTDevice):
+class HassMQTTSensor(HassMQTTDevice, Output):
 
     def __init__(self, sub_id: str):
         super().__init__('sensor', sub_id)
 
     def report_state(self, value):
         client.publish(self.state_topic(), str(value).encode(), retain=True)
+
+    def on_next(self, x):
+        self.report_state(x)
 
     def register(self, config):
         self._register(config, enable_state=True, enable_command=False)
