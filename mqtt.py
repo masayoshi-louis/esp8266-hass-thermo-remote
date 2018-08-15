@@ -59,6 +59,7 @@ class HassMQTTDevice:
         config['availability_topic'] = STATUS_TOPIC
         config["payload_available"] = "1"
         config["payload_not_available"] = "0"
+        _hass_register_device(self.domain, self.sub_id, config)
 
     def register(self, config):
         raise NotImplementedError
