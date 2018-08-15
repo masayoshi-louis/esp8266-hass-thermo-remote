@@ -6,6 +6,7 @@ import ubinascii
 from umqtt.robust import MQTTClient
 
 from config import *
+from thingflow import Scheduler, OutputThing
 
 client = MQTTClient(client_id=ubinascii.hexlify(machine.unique_id()).decode(),
                     server=MQTT_HOST,
@@ -17,7 +18,7 @@ client = MQTTClient(client_id=ubinascii.hexlify(machine.unique_id()).decode(),
 STATUS_TOPIC = '{}/{}'.format(HOSTNAME, 'status')
 
 
-def init():
+def init(sched: Scheduler):
     client.set_last_will(STATUS_TOPIC, b'0', retain=True)
     while 1:
         try:
@@ -25,11 +26,17 @@ def init():
                 print("[MQTT] Connected with persistent session")
             else:
                 print("[MQTT] Connected without persistent session")
-            client.publish(STATUS_TOPIC, b'1', retain=True)
+            _publish_birth_msg()
+            sched.schedule_periodic(Heartbeat(), 29)
             break
         except OSError:
             print("[MQTT] Connecting...")
             time.sleep_ms(500)
+
+
+def _publish_birth_msg():
+    print("[MQTT] Publishing birth message")
+    client.publish(STATUS_TOPIC, b'1', retain=True)
 
 
 def _hass_register_device(domain: str, sub_id: str, data):
@@ -39,6 +46,12 @@ def _hass_register_device(domain: str, sub_id: str, data):
     print("[MQTT]   topic:", topic)
     print("[MQTT]   data:", data_str)
     client.publish(topic, data_str.encode(), retain=True)
+
+
+class Heartbeat(OutputThing):
+    def _observe(self):
+        _publish_birth_msg()
+        return None
 
 
 class HassMQTTDevice:
