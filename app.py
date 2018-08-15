@@ -1,22 +1,27 @@
+import utime as time
+
 import hass
 import mqtt
 from config import *
+from hass import Thermostat as HassThermostat
 from thingflow import Scheduler
-
-hass_api = None
-sched = None
 
 
 def main():
-    global hass_api
-    global sched
     hass_api = hass.API(HASS_BASE_URL, api_password=HASS_PASSWORD)
+    hass_thermo = HassThermostat(hass_api, HASS_THERMOSTAT_ID)
     sched = Scheduler()
 
-    # while not hass_api.validate_api():
-    #     print("[HASS] Connecting to the server...")
-    #     time.sleep_ms(500)
-    # print("[HASS] Connected")
+    cur_state = hass_thermo.get_state()
+    while cur_state is None:
+        print("[HASS] Connecting to the server...")
+        time.sleep_ms(500)
+        cur_state = hass_thermo.get_state()
+    print("[HASS] Connected")
+
+    # test
+    # hass_thermo.set_heat_mode()
+    # hass_thermo.set_temperature(30)
 
     mqtt.init(sched)
 

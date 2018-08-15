@@ -27,6 +27,10 @@ HTTP_HEADER_HA_AUTH = 'X-HA-access'
 CONTENT_TYPE = 'Content-Type'
 CONTENT_TYPE_JSON = 'application/json'
 
+DOMAIN_CLIMATE = 'climate'
+SERVICE_SET_TEMPERATURE = "set_temperature"
+SERVICE_SET_OP_MODE = "set_operation_mode"
+
 
 class API:
     """Object to pass around Home Assistant API location and credentials."""
@@ -41,8 +45,7 @@ class API:
         if api_password is not None:
             self._headers[HTTP_HEADER_HA_AUTH] = api_password
 
-    def __call__(self, method: str, path: str, data=None,
-                 timeout: int = 5) -> requests.Response:
+    def __call__(self, method: str, path: str, data=None) -> requests.Response:
         """Make a call to the Home Assistant API."""
         if data is None:
             data_str = None
@@ -59,8 +62,61 @@ class API:
             self.base_url, 'yes' if self.api_password is not None else 'no')
 
 
-class Thermostat:
-    __slots__ = ['id']
+def get_state(api: API, entity_id: str):
+    """Query given API for state of entity_id."""
+    try:
+        req = api(METH_GET, URL_API_STATES_ENTITY.format(entity_id))
 
-    def __init__(self, entity_id):
+        # req.status_code == 422 if entity does not exist
+
+        return req.json() \
+            if req.status_code == 200 else None
+
+    except (ValueError, OSError):
+        return None
+
+
+def call_service(api: API, domain: str, service: str, service_data=None) -> bool:
+    """Call a service at the remote API."""
+    try:
+        req = api(METH_POST,
+                  URL_API_SERVICES_SERVICE.format(domain, service),
+                  service_data)
+
+        if req.status_code != 200:
+            print("Error calling service: %d - %s", req.status_code, req.text)
+            return False
+        return True
+
+    except (ValueError, OSError):
+        print("Error calling service")
+        return False
+
+
+class Thermostat:
+    __slots__ = ['id', 'api']
+
+    def __init__(self, api: API, entity_id):
+        self.api = api
         self.id = entity_id
+
+    def get_state(self):
+        return get_state(self.api, self.id)
+
+    def set_temperature(self, value: float):
+        call_service(self.api, DOMAIN_CLIMATE, SERVICE_SET_TEMPERATURE, {
+            "entity_id": self.id,
+            "temperature": value
+        })
+
+    def turn_off(self):
+        call_service(self.api, DOMAIN_CLIMATE, SERVICE_SET_OP_MODE, {
+            "entity_id": self.id,
+            "operation_mode": "off"
+        })
+
+    def set_heat_mode(self):
+        call_service(self.api, DOMAIN_CLIMATE, SERVICE_SET_OP_MODE, {
+            "entity_id": self.id,
+            "operation_mode": "heat"
+        })
