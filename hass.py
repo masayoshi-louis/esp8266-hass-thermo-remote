@@ -78,7 +78,7 @@ class API:
         if data is None:
             data_str = None
         else:
-            data_str = json.dumps(data, cls=JSONEncoder)
+            data_str = json.dumps(data)
 
         url = self.base_url + path
 
@@ -122,24 +122,6 @@ def validate_api(api: API):
 
     except HomeAssistantError:
         return API_STATUS_CANNOT_CONNECT
-
-
-class JSONEncoder(json.JSONEncoder):
-    """JSONEncoder that supports Home Assistant objects."""
-
-    # pylint: disable=method-hidden
-    def default(self, o):
-        """Convert Home Assistant objects.
-        Hand other objects to the original method.
-        """
-        # if isinstance(o, datetime):
-        #     return o.isoformat()
-        if isinstance(o, set):
-            return list(o)
-        if hasattr(o, 'as_dict'):
-            return o.as_dict()
-
-        return json.JSONEncoder.default(self, o)
 
 
 class Thermostat:
