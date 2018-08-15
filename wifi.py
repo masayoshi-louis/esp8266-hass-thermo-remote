@@ -7,8 +7,8 @@ def wifi_connect(essid, password):
     # Connect to the wifi. Based on the example in the micropython
     # documentation.
     wlan = network.WLAN(network.STA_IF)
-    wlan.config(dhcp_hostname=HOSTNAME)
     wlan.active(True)
+    wlan.config(dhcp_hostname=HOSTNAME)
     if not wlan.isconnected():
         print('connecting to network ' + essid + '...')
         wlan.connect(essid, password)
