@@ -1,2 +1,10 @@
-HASS_URL = 'http://10.0.100.154:8123'
-HASS_KEY = None
+HASS_HOST = 'http://10.0.100.154'
+HASS_PORT = 8123
+HASS_PASSWORD = None
+
+MQTT_HOST = '10.0.100.154'
+MQTT_PORT = 1883
+MQTT_USER = None
+MQTT_PASSWORD = None
+
+HOSTNAME = 'test-thermostat-remote'

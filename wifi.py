@@ -1,10 +1,13 @@
 import network
 import utime
+from config import HOSTNAME
+
 
 def wifi_connect(essid, password):
     # Connect to the wifi. Based on the example in the micropython
     # documentation.
     wlan = network.WLAN(network.STA_IF)
+    wlan.config(dhcp_hostname=HOSTNAME)
     wlan.active(True)
     if not wlan.isconnected():
         print('connecting to network ' + essid + '...')
@@ -21,6 +24,7 @@ def wifi_connect(essid, password):
         # and then reconnect.
         print('Wifi already connected, network config: %s' % repr(wlan.ifconfig()))
 
+
 def wifi_disconnect():
     # Disconnect from the current network. You may have to
     # do this explicitly if you switch networks, as the params are stored
@@ -31,6 +35,7 @@ def wifi_disconnect():
         wlan.disconnect()
     else:
         print("Wifi not connected.")
+
 
 def disable_wifi_ap():
     # Disable the built-in access point.

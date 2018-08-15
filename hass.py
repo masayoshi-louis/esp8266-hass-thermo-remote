@@ -1,5 +1,5 @@
-import urequests as requests
 import json
+import urequests as requests
 
 METH_GET = 'GET'
 METH_POST = 'POST'
