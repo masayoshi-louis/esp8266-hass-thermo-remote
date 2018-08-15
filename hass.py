@@ -92,14 +92,12 @@ class API:
                 method, url, data=data_str, timeout=timeout,
                 headers=self._headers)
 
-        except requests.exceptions.ConnectionError:
+        except OSError:
             print("Error connecting to server")
             raise HomeAssistantError("Error connecting to server")
 
-        except requests.exceptions.Timeout:
-            error = "Timeout when talking to {}".format(self.host)
-            print(error)
-            raise HomeAssistantError(error)
+        except ValueError:
+            raise HomeAssistantError("Value error")
 
     def __repr__(self) -> str:
         """Return the representation of the API."""
