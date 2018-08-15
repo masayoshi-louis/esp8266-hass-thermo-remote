@@ -1,3 +1,5 @@
+import time
+
 import json
 import machine
 import ubinascii
@@ -17,11 +19,17 @@ STATUS_TOPIC = '{}/{}'.format(HOSTNAME, 'status')
 
 def init():
     client.set_last_will(STATUS_TOPIC, b'0', retain=True)
-    if client.connect(clean_session=False):
-        print("[MQTT] Connected with persistent session")
-    else:
-        print("[MQTT] Connected without persistent session")
-    client.publish(STATUS_TOPIC, b'1', retain=True)
+    while 1:
+        try:
+            if client.connect(clean_session=False):
+                print("[MQTT] Connected with persistent session")
+            else:
+                print("[MQTT] Connected without persistent session")
+            client.publish(STATUS_TOPIC, b'1', retain=True)
+            break
+        except OSError:
+            print("[MQTT] Connecting...")
+            time.sleep_ms(500)
 
 
 def _hass_register_device(domain: str, sub_id: str, data):
