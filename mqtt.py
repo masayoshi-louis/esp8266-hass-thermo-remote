@@ -6,31 +6,26 @@ import machine
 import ubinascii
 from umqtt.robust import MQTTClient
 
-gc.collect()
-
 from config import *
 from thingflow import Scheduler, OutputThing, Output
 
-client = None
-STATUS_TOPIC = None
-
 gc.collect()
+
+_client = None
 
 
 def init(sched: Scheduler):
-    global client
-    global STATUS_TOPIC
-    STATUS_TOPIC = '{}/{}'.format(HOSTNAME, 'status')
-    client = MQTTClient(client_id=ubinascii.hexlify(machine.unique_id()).decode(),
-                        server=MQTT_HOST,
-                        port=MQTT_PORT,
-                        user=MQTT_USER,
-                        password=MQTT_PASSWORD,
-                        keepalive=MQTT_KEEPALIVE)
-    client.set_last_will(STATUS_TOPIC, b'0', retain=True)
+    global _client
+    _client = MQTTClient(client_id=ubinascii.hexlify(machine.unique_id()).decode(),
+                         server=MQTT_HOST,
+                         port=MQTT_PORT,
+                         user=MQTT_USER,
+                         password=MQTT_PASSWORD,
+                         keepalive=MQTT_KEEPALIVE)
+    _client.set_last_will(_status_topic(), b'0', retain=True)
     while 1:
         try:
-            if client.connect(clean_session=False):
+            if _client.connect(clean_session=False):
                 print("[MQTT] Connected with persistent session")
             else:
                 print("[MQTT] Connected without persistent session")
@@ -42,9 +37,13 @@ def init(sched: Scheduler):
             time.sleep_ms(500)
 
 
+def _status_topic():
+    return '{}/{}'.format(HOSTNAME, 'status')
+
+
 def _publish_birth_msg():
     print("[MQTT] Publishing birth message")
-    client.publish(STATUS_TOPIC, b'1', retain=True)
+    _client.publish(_status_topic(), b'1', retain=True)
 
 
 def _hass_register_device(domain: str, sub_id: str, data):
@@ -53,7 +52,7 @@ def _hass_register_device(domain: str, sub_id: str, data):
     print("[MQTT] Publishing device config for {}/{}".format(domain, sub_id))
     print("[MQTT]   topic:", topic)
     print("[MQTT]   data:", data_str)
-    client.publish(topic, data_str.encode(), retain=True)
+    _client.publish(topic, data_str.encode(), retain=True)
 
 
 class Heartbeat(OutputThing):
@@ -85,7 +84,7 @@ class HassMQTTDevice:
             config['state_topic'] = self.state_topic()
         if enable_command:
             config['command_topic'] = self.command_topic()
-        config['availability_topic'] = STATUS_TOPIC
+        config['availability_topic'] = _status_topic()
         config["payload_available"] = "1"
         config["payload_not_available"] = "0"
         _hass_register_device(self.domain, self.sub_id, config)
@@ -100,7 +99,7 @@ class HassMQTTSensor(HassMQTTDevice, Output):
         super().__init__('sensor', sub_id)
 
     def report_state(self, value):
-        client.publish(self.state_topic(), str(value).encode(), retain=True)
+        _client.publish(self.state_topic(), str(value).encode(), retain=True)
 
     def on_next(self, x):
         self.report_state(x)
