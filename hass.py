@@ -1,4 +1,3 @@
-import enum
 import urequests as requests
 import json
 
@@ -27,24 +26,16 @@ HTTP_HEADER_X_REQUESTED_WITH = 'X-Requested-With'
 CONTENT_TYPE = 'Content-Type'
 CONTENT_TYPE_JSON = 'application/json'
 
+API_STATUS_OK = "ok"
+API_STATUS_INVALID_PASSWORD = "invalid_password"
+API_STATUS_CANNOT_CONNECT = "cannot_connect"
+API_STATUS_UNKNOWN = "unknown"
+
 
 class HomeAssistantError(Exception):
     """General Home Assistant exception occurred."""
 
     pass
-
-
-class APIStatus(enum.Enum):
-    """Representation of an API status."""
-
-    OK = "ok"
-    INVALID_PASSWORD = "invalid_password"
-    CANNOT_CONNECT = "cannot_connect"
-    UNKNOWN = "unknown"
-
-    def __str__(self) -> str:
-        """Return the state."""
-        return self.value  # type: ignore
 
 
 class API:
@@ -79,7 +70,7 @@ class API:
         if self.status is None or force_validate:
             self.status = validate_api(self)
 
-        return self.status == APIStatus.OK
+        return self.status == API_STATUS_OK
 
     def __call__(self, method: str, path: str, data=None,
                  timeout: int = 5) -> requests.Response:
@@ -116,21 +107,21 @@ class API:
             self.base_url, 'yes' if self.api_password is not None else 'no')
 
 
-def validate_api(api: API) -> APIStatus:
+def validate_api(api: API):
     """Make a call to validate API."""
     try:
         req = api(METH_GET, URL_API)
 
         if req.status_code == 200:
-            return APIStatus.OK
+            return API_STATUS_OK
 
         if req.status_code == 401:
-            return APIStatus.INVALID_PASSWORD
+            return API_STATUS_INVALID_PASSWORD
 
-        return APIStatus.UNKNOWN
+        return API_STATUS_UNKNOWN
 
     except HomeAssistantError:
-        return APIStatus.CANNOT_CONNECT
+        return API_STATUS_CANNOT_CONNECT
 
 
 class JSONEncoder(json.JSONEncoder):
