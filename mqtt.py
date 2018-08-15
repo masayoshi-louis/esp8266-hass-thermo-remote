@@ -11,19 +11,22 @@ gc.collect()
 from config import *
 from thingflow import Scheduler, OutputThing
 
-client = MQTTClient(client_id=ubinascii.hexlify(machine.unique_id()).decode(),
-                    server=MQTT_HOST,
-                    port=MQTT_PORT,
-                    user=MQTT_USER,
-                    password=MQTT_PASSWORD,
-                    keepalive=MQTT_KEEPALIVE)
-
-STATUS_TOPIC = '{}/{}'.format(HOSTNAME, 'status')
+client = None
+STATUS_TOPIC = None
 
 gc.collect()
 
 
 def init(sched: Scheduler):
+    global client
+    global STATUS_TOPIC
+    STATUS_TOPIC = '{}/{}'.format(HOSTNAME, 'status')
+    client = MQTTClient(client_id=ubinascii.hexlify(machine.unique_id()).decode(),
+                        server=MQTT_HOST,
+                        port=MQTT_PORT,
+                        user=MQTT_USER,
+                        password=MQTT_PASSWORD,
+                        keepalive=MQTT_KEEPALIVE)
     client.set_last_will(STATUS_TOPIC, b'0', retain=True)
     while 1:
         try:
@@ -32,7 +35,7 @@ def init(sched: Scheduler):
             else:
                 print("[MQTT] Connected without persistent session")
             _publish_birth_msg()
-            sched.schedule_periodic(Heartbeat(), 29)
+            sched.schedule_periodic(Heartbeat(), 10 * 60)
             break
         except OSError:
             print("[MQTT] Connecting...")
