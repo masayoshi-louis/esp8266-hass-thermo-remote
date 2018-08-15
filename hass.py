@@ -49,7 +49,7 @@ class API:
         self.port = port
         self.api_password = api_password
 
-        if host.startswith(("http://", "https://")):
+        if host.startswith("http://") or host.startswith("https://"):
             self.base_url = host
         elif use_ssl:
             self.base_url = "https://{}".format(host)
