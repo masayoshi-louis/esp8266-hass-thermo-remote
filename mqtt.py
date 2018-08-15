@@ -1,9 +1,12 @@
+import gc
+import json
 import time
 
-import json
 import machine
 import ubinascii
 from umqtt.robust import MQTTClient
+
+gc.collect()
 
 from config import *
 from thingflow import Scheduler, OutputThing
@@ -16,6 +19,8 @@ client = MQTTClient(client_id=ubinascii.hexlify(machine.unique_id()).decode(),
                     keepalive=MQTT_KEEPALIVE)
 
 STATUS_TOPIC = '{}/{}'.format(HOSTNAME, 'status')
+
+gc.collect()
 
 
 def init(sched: Scheduler):
