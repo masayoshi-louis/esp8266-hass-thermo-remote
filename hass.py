@@ -34,7 +34,6 @@ API_STATUS_UNKNOWN = "unknown"
 
 class HomeAssistantError(Exception):
     """General Home Assistant exception occurred."""
-
     pass
 
 
@@ -79,23 +78,14 @@ class API:
             data_str = None
         else:
             data_str = json.dumps(data)
-
         url = self.base_url + path
-
         try:
             if method == METH_GET:
-                return requests.get(
-                    url, params=data_str, timeout=timeout,
-                    headers=self._headers)
-
-            return requests.request(
-                method, url, data=data_str, timeout=timeout,
-                headers=self._headers)
-
+                return requests.get(url, headers=self._headers)
+            return requests.request(method, url, data=data_str, headers=self._headers)
         except OSError:
             print("Error connecting to server")
             raise HomeAssistantError("Error connecting to server")
-
         except ValueError:
             raise HomeAssistantError("Value error")
 
