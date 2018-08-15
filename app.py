@@ -1,3 +1,5 @@
+import time
+
 import machine
 import ubinascii
 from umqtt.robust import MQTTClient
@@ -18,11 +20,13 @@ mqtt_client = MQTTClient(client_id=my_id,
 
 def main():
     while not hass_api.validate_api():
-        print("Connecting to the home assistant server")
+        print("[HASS] Connecting to the server")
+        time.sleep_ms(500)
     print("Home assistant connected")
 
-    if not mqtt_client.connect(clean_session=False):
-        print("WARN: MQTT server does not support persistent session")
-    print("MQTT connected")
+    if mqtt_client.connect(clean_session=False):
+        print("[MQTT] connected without persistent session")
+    else:
+        print("[MQTT] connected with persistent session")
 
     print("hello")
