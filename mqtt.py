@@ -8,7 +8,8 @@ client = MQTTClient(client_id=ubinascii.hexlify(machine.unique_id()).decode(),
                     server=MQTT_HOST,
                     port=MQTT_PORT,
                     user=MQTT_USER,
-                    password=MQTT_PASSWORD)
+                    password=MQTT_PASSWORD,
+                    keepalive=60)
 
 STATUS_TOPIC = '{}/{}'.format(HOSTNAME, 'status')
 
