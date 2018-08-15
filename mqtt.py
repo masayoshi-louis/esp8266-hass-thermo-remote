@@ -35,7 +35,7 @@ def init():
 def _hass_register_device(domain: str, sub_id: str, data):
     topic = '{}/{}/{}_{}/config'.format(HASS_MQTT_DISCOVERY_PREFIX, domain, HOSTNAME, sub_id)
     data_str = json.dumps(data)
-    print("[MQTT] Sending device config for {}/{}".format(domain, sub_id))
+    print("[MQTT] Publishing device config for {}/{}".format(domain, sub_id))
     print("[MQTT]   topic:", topic)
     print("[MQTT]   data:", data_str)
     client.publish(topic, data_str.encode(), retain=True)
