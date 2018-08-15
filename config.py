@@ -1,0 +1,2 @@
+HASS_URL = 'http://10.0.100.154:8123'
+HASS_KEY = None
