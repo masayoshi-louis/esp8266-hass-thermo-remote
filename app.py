@@ -16,4 +16,6 @@ def main():
     mqtt.init()
 
     # test
-    mqtt.HassMQTTTemperatureSensor().register({})
+    sensor = mqtt.HassMQTTTemperatureSensor()
+    sensor.register({})
+    sensor.report_state(25.5)

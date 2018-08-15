@@ -28,8 +28,8 @@ def _hass_register_device(domain: str, sub_id: str, data):
     topic = '{}/{}/{}_{}/config'.format(HASS_MQTT_DISCOVERY_PREFIX, domain, HOSTNAME, sub_id)
     data_str = json.dumps(data)
     print("[MQTT] Sending device config for {}/{}".format(domain, sub_id))
-    print("[MQTT] \ttopic:", topic)
-    print("[MQTT] \tdata:", data_str)
+    print("[MQTT]   topic:", topic)
+    print("[MQTT]   data:", data_str)
     client.publish(topic, data_str.encode(), retain=True)
 
 
@@ -69,6 +69,9 @@ class HassMQTTSensor(HassMQTTDevice):
 
     def __init__(self, sub_id: str):
         super().__init__('sensor', sub_id)
+
+    def report_state(self, value):
+        client.publish(self.state_topic(), str(value).encode(), retain=True)
 
     def register(self, config):
         self._register(config, enable_state=True, enable_command=False)
