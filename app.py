@@ -3,6 +3,7 @@ from dht import DHT22
 from machine import Pin
 
 import hass
+import model
 import mqtt
 from config import *
 from hass import ThermostatAPI as HassThermostatAPI
@@ -20,6 +21,8 @@ def main():
         time.sleep_ms(500)
         cur_state = hass_thermo.get_state()
     print("[HASS] Connected")
+
+    model.init(cur_state)
 
     # test
     # hass_thermo.set_heat_mode()
