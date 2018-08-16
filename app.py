@@ -36,10 +36,10 @@ def main():
 
     mqtt.init(sched)
 
-    t_sensor_mqtt = mqtt.HassMQTTTemperatureSensor(mapper=lambda x: x[0])
+    t_sensor_mqtt = mqtt.HassMQTTTemperatureSensor(mapper=lambda x: x[2][0])
     t_sensor_mqtt.register({})
 
-    h_sensor_mqtt = mqtt.HassMQTTHumiditySensor(mapper=lambda x: x[1])
+    h_sensor_mqtt = mqtt.HassMQTTHumiditySensor(mapper=lambda x: x[2][1])
     h_sensor_mqtt.register({})
 
     dht_sensor = DHTSensor(Pin(PIN_DHT))
@@ -65,4 +65,4 @@ class DHTSensor:
 
 class DHT2Model(Output):
     def on_next(self, x):
-        model.instance.set_current_humidity(x[1])
+        model.instance.set_current_humidity(x[2][1])
