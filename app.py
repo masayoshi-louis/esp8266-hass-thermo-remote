@@ -58,7 +58,7 @@ class DHTSensor:
     def sample(self):
         self.s.measure()
         result = [self.s.temperature(), self.s.humidity()]
-        print("[DHT] T = {} {}, H = {} %", result[0], TEMPERATURE_UNIT, result[1])
+        print("[DHT] T = {} {}, H = {} %".format(result[0], TEMPERATURE_UNIT, result[1]))
         return result
 
 
