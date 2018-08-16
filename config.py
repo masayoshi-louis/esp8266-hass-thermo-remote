@@ -15,7 +15,7 @@ HOSTNAME = 'test-thermostat-remote'
 
 TEMPERATURE_UNIT = '°C'
 
-PIN_DHT = 16  # D0
+PIN_DHT = 2  # D4
 PIN_I2C_SCL = 5  # D1
 PIN_I2C_SDA = 4  # D2
 PIN_BTN_1 = 0  # D3
