@@ -1,14 +1,14 @@
 import network
 import utime
-from config import HOSTNAME
 
 
-def wifi_connect(essid, password):
+def wifi_connect(essid, password, hostname=None):
     # Connect to the wifi. Based on the example in the micropython
     # documentation.
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
-    wlan.config(dhcp_hostname=HOSTNAME)
+    if hostname is not None:
+        wlan.config(dhcp_hostname=hostname)
     if not wlan.isconnected():
         print('connecting to network ' + essid + '...')
         wlan.connect(essid, password)
