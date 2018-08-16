@@ -94,15 +94,17 @@ class HassMQTTDevice:
 
 
 class HassMQTTSensor(HassMQTTDevice, Output):
+    __slots__ = ['mapper']
 
-    def __init__(self, sub_id: str):
+    def __init__(self, sub_id: str, mapper):
         super().__init__('sensor', sub_id)
+        self.mapper = mapper
 
     def report_state(self, value):
         _client.publish(self.state_topic(), str(value).encode(), retain=True)
 
     def on_next(self, x):
-        self.report_state(x)
+        self.report_state(self.mapper(x))
 
     def register(self, config):
         self._register(config, enable_state=True, enable_command=False)
@@ -110,8 +112,8 @@ class HassMQTTSensor(HassMQTTDevice, Output):
 
 class HassMQTTTemperatureSensor(HassMQTTSensor):
 
-    def __init__(self, sub_id: str = 'temperature'):
-        super().__init__(sub_id)
+    def __init__(self, sub_id: str = 'temperature', **kw):
+        super().__init__(sub_id, **kw)
 
     def register(self, config):
         config['device_class'] = 'temperature'
@@ -121,8 +123,8 @@ class HassMQTTTemperatureSensor(HassMQTTSensor):
 
 class HassMQTTHumiditySensor(HassMQTTSensor):
 
-    def __init__(self, sub_id: str = 'humidity'):
-        super().__init__(sub_id)
+    def __init__(self, sub_id: str = 'humidity', **kw):
+        super().__init__(sub_id, **kw)
 
     def register(self, config):
         config['device_class'] = 'humidity'

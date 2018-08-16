@@ -1,4 +1,6 @@
 import utime as time
+from dht import DHT22
+from machine import Pin
 
 import hass
 import mqtt
@@ -25,9 +27,25 @@ def main():
 
     mqtt.init(sched)
 
-    # test
-    sensor = mqtt.HassMQTTTemperatureSensor()
-    sensor.register({})
-    sensor.report_state(25.5)
+    t_sensor_mqtt = mqtt.HassMQTTTemperatureSensor(mapper=lambda x: x[0])
+    t_sensor_mqtt.register({})
+
+    h_sensor_mqtt = mqtt.HassMQTTHumiditySensor(mapper=lambda x: x[1])
+    h_sensor_mqtt.register({})
+
+    dht_sensor = DHTSensor(Pin(PIN_DHT))
+
+    sched.schedule_sensor(dht_sensor, 10, t_sensor_mqtt, h_sensor_mqtt)
 
     sched.run_forever()
+
+
+class DHTSensor:
+    __slots__ = ['s']
+
+    def __init__(self, p):
+        self.s = DHT22(p)
+
+    def sample(self):
+        self.s.measure()
+        return [self.s.temperature(), self.s.humidity()]
