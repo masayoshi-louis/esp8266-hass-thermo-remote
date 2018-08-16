@@ -50,10 +50,11 @@ def main():
 
 
 class DHTSensor:
-    __slots__ = ['s']
+    __slots__ = ['s', 'sensor_id']
 
     def __init__(self, p):
         self.s = DHT11(p)
+        self.sensor_id = 'DHT'
 
     def sample(self):
         self.s.measure()
