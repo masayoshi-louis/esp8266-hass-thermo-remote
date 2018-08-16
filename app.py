@@ -1,5 +1,5 @@
 import utime as time
-from dht import DHT22
+from dht import DHT11
 from machine import Pin
 
 import hass
@@ -53,7 +53,7 @@ class DHTSensor:
     __slots__ = ['s']
 
     def __init__(self, p):
-        self.s = DHT22(p)
+        self.s = DHT11(p)
 
     def sample(self):
         self.s.measure()
