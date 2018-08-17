@@ -24,5 +24,6 @@ then
 fi
 
 sudo ampy -p $TTY_PORT put main.py
+#sudo ampy -p $TTY_PORT put app.py
 
 echo 'done!'

@@ -42,7 +42,7 @@ def main():
     h_sensor_mqtt = mqtt.HassMQTTHumiditySensor(mapper=lambda x: x[2][1])
     h_sensor_mqtt.register({})
 
-    dht_sensor = DHTSensor(Pin(PIN_DHT))
+    dht_sensor = DHTSensor(PIN_DHT)
 
     sched.schedule_sensor(dht_sensor, 10, t_sensor_mqtt, h_sensor_mqtt, DHT2Model())
 
@@ -50,17 +50,22 @@ def main():
 
 
 class DHTSensor:
-    __slots__ = ['s', 'sensor_id']
+    __slots__ = ['p', 's', 'sensor_id']
 
     def __init__(self, p):
-        self.s = DHT11(p)
+        self.s = DHT11(Pin(p))
         self.sensor_id = 'DHT'
 
     def sample(self):
-        self.s.measure()
-        result = [self.s.temperature(), self.s.humidity()]
-        print("[DHT] T = {} {}, H = {} %".format(result[0], TEMPERATURE_UNIT, result[1]))
-        return result
+        while 1:
+            try:
+                self.s.measure()
+                result = [self.s.temperature(), self.s.humidity()]
+                print("[DHT] T = {} {}, H = {} %".format(result[0], TEMPERATURE_UNIT, result[1]))
+                return result
+            except OSError as e:
+                print("[DHT]", repr(e), "retry")
+                time.sleep(1)
 
 
 class DHT2Model(Output):

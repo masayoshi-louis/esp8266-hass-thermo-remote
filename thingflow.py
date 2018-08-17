@@ -113,7 +113,7 @@ class Output:
     def on_completed():
         pass
     def on_error(self, e):
-        print("Error: " + e)
+        print("Error: " + repr(e))
 
 class _Interval:
     __slots__ = ('ticks', 'tasks', 'next_tick')
