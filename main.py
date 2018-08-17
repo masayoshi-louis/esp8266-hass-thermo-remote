@@ -3,18 +3,6 @@ import os
 
 import app
 
-# import upip
-
-# try:
-#     import datetime
-# except ImportError:
-#     upip.install("micropython-datetime")
-
-# try:
-#     import urllib.parse
-# except ImportError:
-#     upip.install('micropython-urllib.parse')
-
 WIFI_SETUP_FLAG = 'wifi_setup.flag'
 
 if WIFI_SETUP_FLAG not in os.listdir():
