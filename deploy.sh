@@ -9,12 +9,12 @@ cd $MPY_DIR
 sudo esptool.py --port $TTY_PORT erase_flash
 sudo make PORT=$TTY_PORT deploy
 
-sudo ampy --port $TTY_PORT put config.py
-sudo ampy --port $TTY_PORT put wifi.py
+sudo ampy -p $TTY_PORT put config.py
+sudo ampy -p $TTY_PORT put wifi.py
 
 if [ -f wifi_cfg.py ]
 then
-    sudo ampy --port $TTY_PORT put wifi_cfg.py
+    sudo ampy -p $TTY_PORT put wifi_cfg.py
 fi
 
-#sudo ampy --port $TTY_PORT put main.py
+#sudo ampy -p $TTY_PORT put main.py
