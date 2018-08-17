@@ -9,15 +9,16 @@ import mqtt
 from config import *
 from hass import ThermostatAPI as HassThermostatAPI
 
-dht_sensor = None
+_dht_sensor = None
 
 _dht_tim_id = const(2)
 _dht_tim = None
 
 
 def main():
-    global dht_sensor
+    global _dht_sensor
     global _dht_tim
+
     hass_api = hass.API(HASS_BASE_URL, api_password=HASS_PASSWORD)
     hass_thermo = HassThermostatAPI(hass_api, HASS_THERMOSTAT_ID)
 
@@ -45,7 +46,7 @@ def main():
     h_sensor_mqtt = mqtt.HassMQTTHumiditySensor(mapper=lambda x: x[1])
     h_sensor_mqtt.register({})
 
-    dht_sensor = DHTSensor(PIN_DHT)
+    _dht_sensor = DHTSensor(PIN_DHT)
 
     _dht_tim = Timer(_dht_tim_id)
     _dht_tim.init(period=10000, mode=Timer.PERIODIC,
@@ -55,7 +56,7 @@ def main():
 
 
 class DHTSensor:
-    __slots__ = ['p', 's', 'sensor_id']
+    __slots__ = ['s', 'sensor_id']
 
     def __init__(self, p):
         self.s = DHT11(Pin(p))
@@ -79,7 +80,7 @@ class DHT2Model:
 
 def _dht_updater(*conns):
     def f(_timer):
-        result = dht_sensor.sample()
+        result = _dht_sensor.sample()
         for s in conns:
             s.on_next(result)
 

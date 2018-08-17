@@ -4,6 +4,7 @@ import time
 
 import machine
 import ubinascii
+from machine import Timer
 from micropython import const
 from umqtt.robust import MQTTClient
 
@@ -35,8 +36,8 @@ def init():
             else:
                 print("[MQTT] Connected without persistent session")
             _publish_birth_msg()
-            _hb_tim = machine.Timer(_hb_tim_id)
-            _hb_tim.init(period=60 * 1000, mode=machine.Timer.PERIODIC, callback=_heartbeat)
+            _hb_tim = Timer(_hb_tim_id)
+            _hb_tim.init(period=MQTT_HEARTBEAT_INTERVAL * 1000, mode=Timer.PERIODIC, callback=_heartbeat)
             break
         except OSError:
             print("[MQTT] Connecting...")
