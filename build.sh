@@ -16,7 +16,6 @@ cp -t ../micropython/ports/esp8266/modules \
   model.py \
   mqtt.py \
   ssd1306.py \
-  thingflow.py \
   writer.py
 
 cp -r font ../micropython/ports/esp8266/modules

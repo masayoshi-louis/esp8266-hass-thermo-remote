@@ -4,18 +4,23 @@ import time
 
 import machine
 import ubinascii
+from micropython import const
 from umqtt.robust import MQTTClient
 
 from config import *
-from thingflow import Scheduler, OutputThing, Output
 
 gc.collect()
 
 _client = None
 
+_hb_tim = None
 
-def init(sched: Scheduler):
+_hb_tim_id = const(1)
+
+
+def init():
     global _client
+    global _hb_tim
     _client = MQTTClient(client_id=ubinascii.hexlify(machine.unique_id()).decode(),
                          server=MQTT_HOST,
                          port=MQTT_PORT,
@@ -30,11 +35,17 @@ def init(sched: Scheduler):
             else:
                 print("[MQTT] Connected without persistent session")
             _publish_birth_msg()
-            sched.schedule_periodic(Heartbeat(), MQTT_HEARTBEAT_INTERVAL)
+            _hb_tim = machine.Timer(_hb_tim_id)
+            _hb_tim.init(period=60 * 1000, mode=machine.Timer.PERIODIC, callback=_heartbeat)
             break
         except OSError:
             print("[MQTT] Connecting...")
             time.sleep_ms(500)
+
+
+def loop():
+    while 1:
+        _client.wait_msg()
 
 
 def _status_topic():
@@ -46,6 +57,10 @@ def _publish_birth_msg():
     _client.publish(_status_topic(), b'1', retain=True)
 
 
+def _heartbeat(_timer):
+    _publish_birth_msg()
+
+
 def _hass_register_device(domain: str, sub_id: str, data):
     topic = '{}/{}/{}_{}/config'.format(HASS_MQTT_DISCOVERY_PREFIX, domain, HOSTNAME, sub_id)
     data_str = json.dumps(data)
@@ -53,12 +68,6 @@ def _hass_register_device(domain: str, sub_id: str, data):
     print("[MQTT]   topic:", topic)
     print("[MQTT]   data:", data_str)
     _client.publish(topic, data_str.encode(), retain=True)
-
-
-class Heartbeat(OutputThing):
-    def _observe(self):
-        _publish_birth_msg()
-        return None
 
 
 class HassMQTTDevice:
@@ -93,7 +102,7 @@ class HassMQTTDevice:
         raise NotImplementedError
 
 
-class HassMQTTSensor(HassMQTTDevice, Output):
+class HassMQTTSensor(HassMQTTDevice):
     __slots__ = ['mapper']
 
     def __init__(self, sub_id: str, mapper):
