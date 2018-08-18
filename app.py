@@ -56,7 +56,8 @@ def main():
     # hass_thermo.set_heat_mode()
     # hass_thermo.set_temperature(30)
 
-    mqtt.init(mqtt_msg_dispatch, sys_status.set_mqtt)
+    mqtt.init(mqtt_msg_dispatch)
+    sys_status.set_mqtt(True)
 
     t_sensor_mqtt = mqtt.HassMQTTTemperatureSensor(mapper=lambda x: x.t)
     t_sensor_mqtt.register({})

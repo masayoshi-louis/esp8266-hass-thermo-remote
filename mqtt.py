@@ -14,75 +14,20 @@ _client = None
 
 
 class MQTTClient(umqtt.simple.MQTTClient):
-    DELAY = 2
-    DEBUG = True
-
-    __slots__ = ['pending_msg', 'reconnect_listeners', 'disconnect_listeners']
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.pending_msg = {}
-        self.reconnect_listeners = [self.publish_pending_msgs]
-        self.disconnect_listeners = []
-
-    def on_reconnect(self, l):
-        self.reconnect_listeners.append(l)
-
-    def on_disconnected(self, l):
-        self.disconnect_listeners.append(l)
-
-    def __fire_disconnected(self):
-        for notify in self.disconnect_listeners:
-            notify()
-
-    def delay(self, _i):
-        time.sleep(self.DELAY)
-
-    def log(self, in_reconnect, e):
-        if self.DEBUG:
-            if in_reconnect:
-                print("mqtt reconnect: %r" % e)
-            else:
-                print("mqtt: %r" % e)
-
-    def reconnect(self):
-        i = 0
-        while 1:
-            try:
-                r = super().connect(False)
-                for notify in self.reconnect_listeners:
-                    notify()
-                return r
-            except OSError as e:
-                self.log(True, e)
-                i += 1
-                self.delay(i)
-
-    def publish_pending_msgs(self):
-        d = self.pending_msg.copy()
-        self.pending_msg.clear()
-        for key, value in d.items():
-            self.publish(key, value[0], value[1], value[2])
-
     def publish(self, topic, msg, retain=False, qos=0):
         try:
             return super().publish(topic, msg, retain, qos)
-        except OSError as e:
-            self.log(False, e)
-            self.pending_msg[topic] = (msg, retain, qos)
-            self.__fire_disconnected()
+        except OSError:
+            machine.reset()
 
     def wait_msg(self):
-        while 1:
-            try:
-                return super().wait_msg()
-            except OSError as e:
-                self.log(False, e)
-                self.__fire_disconnected()
-            self.reconnect()
+        try:
+            return super().wait_msg()
+        except OSError:
+            machine.reset()
 
 
-def init(msg_cb, status_listener):
+def init(msg_cb):
     global _client
     global _hb_tim
     _client = MQTTClient(client_id=ubinascii.hexlify(machine.unique_id()).decode(),
@@ -99,10 +44,6 @@ def init(msg_cb, status_listener):
             else:
                 print("[MQTT] Connected without persistent session")
             _publish_birth_msg()
-            status_listener(True)
-            _client.on_reconnect(_publish_birth_msg)
-            _client.on_reconnect(lambda: status_listener(True))
-            _client.on_disconnected(lambda: status_listener(False))
             _client.set_callback(msg_cb)
             _client.subscribe("{}/climate/{}/{}".format(
                 HASS_MQTT_STATE_STREAM_PREFIX,
