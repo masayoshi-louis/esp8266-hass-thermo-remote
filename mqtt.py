@@ -1,4 +1,3 @@
-import gc
 import json
 
 import machine
@@ -7,8 +6,6 @@ import umqtt.simple
 import utime as time
 
 from config import *
-
-gc.collect()
 
 _client = None
 
