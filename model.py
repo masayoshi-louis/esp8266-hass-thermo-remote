@@ -13,6 +13,15 @@ ATTR_OP_MODE = 'operation_mode'
 ATTR_STATE = 'state'
 
 
+class SensorSample:
+    __slots__ = ['t', 'h', 'p']
+
+    def __init__(self, temperature: float, humidity: float, pressure: float):
+        self.t = temperature
+        self.h = humidity
+        self.p = pressure
+
+
 class ThermostatModel:
     __slots__ = [ATTR_SETPOINT, ATTR_CURRENT_TEMPERATURE, ATTR_OP_MODE, ATTR_STATE, 'current_humidity', 'listeners']
 

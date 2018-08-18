@@ -8,6 +8,7 @@ import model
 import mqtt
 from config import *
 from hass import ThermostatAPI as HassThermostatAPI
+from model import SensorSample
 
 dht_sensor = None
 
@@ -40,34 +41,38 @@ def main():
 
     mqtt.init()
 
-    t_sensor_mqtt = mqtt.HassMQTTTemperatureSensor(mapper=lambda x: x[0])
+    t_sensor_mqtt = mqtt.HassMQTTTemperatureSensor(mapper=lambda x: x.t)
     t_sensor_mqtt.register({})
 
-    h_sensor_mqtt = mqtt.HassMQTTHumiditySensor(mapper=lambda x: x[1])
+    h_sensor_mqtt = mqtt.HassMQTTHumiditySensor(mapper=lambda x: x.h)
     h_sensor_mqtt.register({})
 
     dht_sensor = DHTSensor(PIN_DHT)
 
     dht_tim = Timer(DHT_TIM_ID)
-    dht_tim.init(period=10000, mode=Timer.PERIODIC,
-                 callback=dht_updater(t_sensor_mqtt, h_sensor_mqtt, DHT2Model()))
+    sensor_update = dht_updater(t_sensor_mqtt, h_sensor_mqtt, DHT2Model())
+    sensor_update(None)
+    dht_tim.init(period=SENSOR_SAMPLE_INTERVAL * 1000, mode=Timer.PERIODIC,
+                 callback=sensor_update)
 
     mqtt.loop()
 
 
 class DHTSensor:
-    __slots__ = ['dht', 'availability']
+    __slots__ = ['dht', 'availability', 'prev_sample']
 
     def __init__(self, p):
         self.dht = DHT11(Pin(p))
         self.availability = True
+        self.prev_sample = SensorSample(-1000, -1000, -1000)
 
     def sample(self):
         try:
             self.dht.measure()
-            result = (self.dht.temperature(), self.dht.humidity())
+            result = SensorSample(self.dht.temperature(), self.dht.humidity(), -1000)
+            self.prev_sample = result
             self.availability = True
-            print("[DHT] T = {} {}, H = {} %".format(result[0], TEMPERATURE_UNIT, result[1]))
+            print("[DHT] T = {} {}, H = {} % RH".format(result.t, TEMPERATURE_UNIT, result.h))
             return result
         except OSError as e:
             print("[DHT]", repr(e))
@@ -76,8 +81,8 @@ class DHTSensor:
 
 
 class DHT2Model:
-    def on_next(self, x):
-        model.instance.set_current_humidity(x[1])
+    def on_next(self, x: SensorSample):
+        model.instance.set_current_humidity(x.h)
 
 
 def dht_updater(*conns):
