@@ -82,7 +82,7 @@ class DHT2Model:
 
 def _dht_updater(*conns):
     def f(_timer):
-        schedule(dht_push_sample_ref, conns)
+        schedule(dht_push_sample, conns)
 
     return f
 
@@ -92,6 +92,3 @@ def dht_push_sample(conns):
     if result is not None:
         for s in conns:
             s.on_next(result)
-
-
-dht_push_sample_ref = dht_push_sample
