@@ -27,12 +27,14 @@ def main():
     sys_status = SystemStatus()
 
     dht_sensor = DHTSensor(PIN_DHT)
-    try:
-        dht_sensor.sample()  # test sensor
-        sys_status.set_sensor(True)
-    except OSError as e:
-        print("Fatal: sensor failure", repr(e))
-        return
+    while 1:
+        try:
+            dht_sensor.sample()  # test sensor
+            sys_status.set_sensor(True)
+            break
+        except OSError as e:
+            print("Sensor failure", repr(e))
+            time.sleep(3)
 
     hass_api = hass.API(HASS_BASE_URL, api_password=HASS_PASSWORD)
     hass_thermo = HassThermostatAPI(hass_api, HASS_THERMOSTAT_ID)
