@@ -1,7 +1,7 @@
 import utime as time
 from dht import DHT11
 from machine import Pin, Timer
-from micropython import const
+from micropython import const, schedule
 
 import hass
 import model
@@ -9,15 +9,15 @@ import mqtt
 from config import *
 from hass import ThermostatAPI as HassThermostatAPI
 
-_dht_sensor = None
+dht_sensor = None
 
-_dht_tim_id = const(2)
-_dht_tim = None
+DHT_TIM_ID = const(1)
+dht_tim = None
 
 
 def main():
-    global _dht_sensor
-    global _dht_tim
+    global dht_sensor
+    global dht_tim
 
     hass_api = hass.API(HASS_BASE_URL, api_password=HASS_PASSWORD)
     hass_thermo = HassThermostatAPI(hass_api, HASS_THERMOSTAT_ID)
@@ -46,11 +46,11 @@ def main():
     h_sensor_mqtt = mqtt.HassMQTTHumiditySensor(mapper=lambda x: x[1])
     h_sensor_mqtt.register({})
 
-    _dht_sensor = DHTSensor(PIN_DHT)
+    dht_sensor = DHTSensor(PIN_DHT)
 
-    _dht_tim = Timer(_dht_tim_id)
-    _dht_tim.init(period=10000, mode=Timer.PERIODIC,
-                  callback=_dht_updater(t_sensor_mqtt, h_sensor_mqtt, DHT2Model()))
+    dht_tim = Timer(DHT_TIM_ID)
+    dht_tim.init(period=10000, mode=Timer.PERIODIC,
+                 callback=_dht_updater(t_sensor_mqtt, h_sensor_mqtt, DHT2Model()))
 
     mqtt.loop()
 
@@ -82,9 +82,16 @@ class DHT2Model:
 
 def _dht_updater(*conns):
     def f(_timer):
-        result = _dht_sensor.sample()
-        if result is not None:
-            for s in conns:
-                s.on_next(result)
+        schedule(dht_push_sample_ref, conns)
 
     return f
+
+
+def dht_push_sample(conns):
+    result = dht_sensor.sample()
+    if result is not None:
+        for s in conns:
+            s.on_next(result)
+
+
+dht_push_sample_ref = dht_push_sample

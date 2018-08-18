@@ -4,8 +4,6 @@ import json
 import machine
 import ubinascii
 import utime as time
-from machine import Timer
-from micropython import const
 from umqtt import simple
 
 from config import *
@@ -13,10 +11,6 @@ from config import *
 gc.collect()
 
 _client = None
-
-_hb_tim = None
-
-_hb_tim_id = const(1)
 
 
 class MQTTClient(simple.MQTTClient):
@@ -96,8 +90,6 @@ def init():
                 print("[MQTT] Connected without persistent session")
             _publish_birth_msg()
             _client.on_reconnect(_publish_birth_msg)
-            # _hb_tim = Timer(_hb_tim_id)
-            # _hb_tim.init(period=MQTT_HEARTBEAT_INTERVAL * 1000, mode=Timer.PERIODIC, callback=_heartbeat)
             break
         except OSError:
             print("[MQTT] Connecting...")
@@ -116,10 +108,6 @@ def _status_topic():
 def _publish_birth_msg():
     print("[MQTT] Publishing birth message")
     _client.publish(_status_topic(), b'1', retain=True)
-
-
-def _heartbeat(_timer):
-    _publish_birth_msg()
 
 
 def _hass_register_device(domain: str, sub_id: str, data):

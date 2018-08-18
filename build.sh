@@ -9,13 +9,14 @@ micropython -m upip install -p modules micropython-umqtt.simple
 cd $PROJ_DIR
 
 cp -t ../micropython/ports/esp8266/modules \
-  app.py \
   bme280.py \
   hass.py \
   model.py \
   mqtt.py \
   ssd1306.py \
-  writer.py
+  writer.py \
+  wifi.py \
+  wifi_init.py
 
 cp -r font ../micropython/ports/esp8266/modules
 

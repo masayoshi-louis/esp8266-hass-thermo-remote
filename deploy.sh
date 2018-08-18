@@ -16,7 +16,6 @@ echo 'uploading scripts'
 cd $PROJ_DIR
 
 sudo ampy -p $TTY_PORT put config.py
-sudo ampy -p $TTY_PORT put wifi.py
 
 if [ -f wifi_cfg.py ]
 then
@@ -24,6 +23,6 @@ then
 fi
 
 sudo ampy -p $TTY_PORT put main.py
-#sudo ampy -p $TTY_PORT put app.py
+sudo ampy -p $TTY_PORT put app.py
 
 echo 'done!'
