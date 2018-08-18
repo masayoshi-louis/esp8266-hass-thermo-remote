@@ -1,4 +1,3 @@
-import machine
 import utime as time
 from dht import DHT11
 from machine import Pin, Timer
@@ -10,8 +9,7 @@ import mqtt
 from config import *
 from hass import ThermostatAPI as HassThermostatAPI
 from model import SensorSample
-
-sys_status = None
+from sys_status import instance as sys_status
 
 dht_sensor = None
 
@@ -20,11 +18,8 @@ dht_tim = None
 
 
 def main():
-    global sys_status
     global dht_sensor
     global dht_tim
-
-    sys_status = SystemStatus()
 
     dht_sensor = DHTSensor(PIN_DHT)
     while 1:
@@ -58,6 +53,7 @@ def main():
 
     mqtt.init(mqtt_msg_dispatch)
     sys_status.set_mqtt(True)
+    sys_status.boot = False
 
     t_sensor_mqtt = mqtt.HassMQTTTemperatureSensor(mapper=lambda x: x.t)
     t_sensor_mqtt.register({})
@@ -108,42 +104,10 @@ def dht_push_sample(conns):
     except OSError as e:
         print("[DHT]", repr(e))
         sys_status.set_sensor(False)
-        machine.reset()
         result = None  # actually impossible
     if result is not None:
         for s in conns:
             s.on_next(result)
-
-
-class SystemStatus:
-    __slots__ = ['sensor', 'hass_api', 'mqtt']
-
-    def __init__(self):
-        self.sensor = False
-        self.hass_api = False
-        self.mqtt = False
-        self.__update_led()
-
-    def set_sensor(self, v: bool):
-        self.sensor = v
-        self.__on_update("Sensor", v)
-
-    def set_hass_api(self, v: bool):
-        self.hass_api = v
-        self.__on_update("Home assistant API", v)
-
-    def set_mqtt(self, v: bool):
-        self.mqtt = v
-        self.__on_update("MQTT client", v)
-
-    def __on_update(self, item: str, v: bool):
-        print("{} is{} OK".format(item, '' if v else ' not'))
-        self.__update_led()
-
-    def __update_led(self):
-        led = Pin(2, Pin.OUT)
-        s = self.sensor and self.hass_api and self.mqtt
-        led.value(s)
 
 
 def mqtt_msg_dispatch(topic, msg):

@@ -9,6 +9,7 @@ micropython -m upip install -p modules micropython-umqtt.simple
 cd $PROJ_DIR
 
 cp -t ../micropython/ports/esp8266/modules \
+  sys_status.py \
   bme280.py \
   hass.py \
   model.py \

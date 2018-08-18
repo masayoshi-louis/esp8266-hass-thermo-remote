@@ -6,6 +6,7 @@ import umqtt.simple
 import utime as time
 
 from config import *
+from sys_status import instance as sys_status
 
 _client = None
 
@@ -15,13 +16,13 @@ class MQTTClient(umqtt.simple.MQTTClient):
         try:
             return super().publish(topic, msg, retain, qos)
         except OSError:
-            machine.reset()
+            sys_status.set_mqtt(False)
 
     def wait_msg(self):
         try:
             return super().wait_msg()
         except OSError:
-            machine.reset()
+            sys_status.set_mqtt(False)
 
 
 def init(msg_cb):
