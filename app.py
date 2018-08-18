@@ -56,21 +56,23 @@ def main():
 
 
 class DHTSensor:
-    __slots__ = ['s', 'sensor_id']
+    __slots__ = ['dht', 'availability']
 
     def __init__(self, p):
-        self.s = DHT11(Pin(p))
-        self.sensor_id = 'DHT'
+        self.dht = DHT11(Pin(p))
+        self.availability = True
 
     def sample(self):
-        while 1:
-            try:
-                self.s.measure()
-                result = [self.s.temperature(), self.s.humidity()]
-                print("[DHT] T = {} {}, H = {} %".format(result[0], TEMPERATURE_UNIT, result[1]))
-                return result
-            except OSError as e:
-                print("[DHT]", repr(e), "retry")
+        try:
+            self.dht.measure()
+            result = (self.dht.temperature(), self.dht.humidity())
+            self.availability = True
+            print("[DHT] T = {} {}, H = {} %".format(result[0], TEMPERATURE_UNIT, result[1]))
+            return result
+        except OSError as e:
+            print("[DHT]", repr(e))
+            self.availability = False
+            return None
 
 
 class DHT2Model:
@@ -81,7 +83,8 @@ class DHT2Model:
 def _dht_updater(*conns):
     def f(_timer):
         result = _dht_sensor.sample()
-        for s in conns:
-            s.on_next(result)
+        if result is not None:
+            for s in conns:
+                s.on_next(result)
 
     return f

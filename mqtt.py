@@ -1,12 +1,12 @@
 import gc
 import json
-import time
 
 import machine
 import ubinascii
+import utime as time
 from machine import Timer
 from micropython import const
-from umqtt.robust import MQTTClient
+from umqtt import simple
 
 from config import *
 
@@ -17,6 +17,65 @@ _client = None
 _hb_tim = None
 
 _hb_tim_id = const(1)
+
+
+class MQTTClient(simple.MQTTClient):
+    DELAY = 2
+    DEBUG = True
+
+    __slots__ = ['pending_msg', 'reconnect_listeners']
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.pending_msg = {}
+        self.reconnect_listeners = [self.publish_pending_msgs]
+
+    def on_reconnect(self, l):
+        self.reconnect_listeners.append(l)
+
+    def delay(self, _i):
+        time.sleep(self.DELAY)
+
+    def log(self, in_reconnect, e):
+        if self.DEBUG:
+            if in_reconnect:
+                print("mqtt reconnect: %r" % e)
+            else:
+                print("mqtt: %r" % e)
+
+    def reconnect(self):
+        i = 0
+        while 1:
+            try:
+                r = super().connect(False)
+                for notify in self.reconnect_listeners:
+                    notify()
+                return r
+            except OSError as e:
+                self.log(True, e)
+                i += 1
+                self.delay(i)
+
+    def publish_pending_msgs(self):
+        d = self.pending_msg.copy()
+        self.pending_msg.clear()
+        for key, value in d.items():
+            self.publish(key, value[0], value[1], value[2])
+
+    def publish(self, topic, msg, retain=False, qos=0):
+        try:
+            return super().publish(topic, msg, retain, qos)
+        except OSError as e:
+            self.log(False, e)
+            self.pending_msg[topic] = (msg, retain, qos)
+
+    def wait_msg(self):
+        while 1:
+            try:
+                return super().wait_msg()
+            except OSError as e:
+                self.log(False, e)
+            self.reconnect()
 
 
 def init():
@@ -36,8 +95,9 @@ def init():
             else:
                 print("[MQTT] Connected without persistent session")
             _publish_birth_msg()
-            _hb_tim = Timer(_hb_tim_id)
-            _hb_tim.init(period=MQTT_HEARTBEAT_INTERVAL * 1000, mode=Timer.PERIODIC, callback=_heartbeat)
+            _client.on_reconnect(_publish_birth_msg)
+            # _hb_tim = Timer(_hb_tim_id)
+            # _hb_tim.init(period=MQTT_HEARTBEAT_INTERVAL * 1000, mode=Timer.PERIODIC, callback=_heartbeat)
             break
         except OSError:
             print("[MQTT] Connecting...")

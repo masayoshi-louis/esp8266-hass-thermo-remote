@@ -8,7 +8,7 @@ MQTT_HOST = '192.168.2.130'
 MQTT_PORT = 1883
 MQTT_USER = None
 MQTT_PASSWORD = None
-MQTT_KEEPALIVE = 6 * 60  # seconds
+MQTT_KEEPALIVE = 120  # seconds
 MQTT_HEARTBEAT_INTERVAL = 5 * 60
 
 HOSTNAME = 'test-thermostat-remote'

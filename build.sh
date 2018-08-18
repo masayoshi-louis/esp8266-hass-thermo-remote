@@ -4,7 +4,6 @@ MPY_DIR=$PROJ_DIR/../micropython/ports/esp8266
 cd $MPY_DIR
 make clean-frozen
 micropython -m upip install -p modules micropython-urequests
-micropython -m upip install -p modules micropython-umqtt.robust
 micropython -m upip install -p modules micropython-umqtt.simple
 
 cd $PROJ_DIR
