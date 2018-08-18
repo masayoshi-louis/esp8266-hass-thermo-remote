@@ -54,7 +54,7 @@ def main():
     # hass_thermo.set_heat_mode()
     # hass_thermo.set_temperature(30)
 
-    mqtt.init(sys_status.set_mqtt)
+    mqtt.init(mqtt_msg_dispatch, sys_status.set_mqtt)
 
     t_sensor_mqtt = mqtt.HassMQTTTemperatureSensor(mapper=lambda x: x.t)
     t_sensor_mqtt.register({})
@@ -89,7 +89,7 @@ class DHTSensor:
 
 class DHT2Model:
     def on_next(self, x: SensorSample):
-        model.instance.set_current_humidity(x.h)
+        model.instance.set_current_temperature(float(x.t))
 
 
 def dht_updater(*conns):
@@ -107,8 +107,9 @@ def dht_push_sample(conns):
         sys_status.set_sensor(False)
         machine.reset()
         result = None  # actually impossible
-    for s in conns:
-        s.on_next(result)
+    if result is not None:
+        for s in conns:
+            s.on_next(result)
 
 
 class SystemStatus:
@@ -134,3 +135,7 @@ class SystemStatus:
     @staticmethod
     def __log(item: str, v: bool):
         print("{} is{} OK".format(item, '' if v else ' not'))
+
+
+def mqtt_msg_dispatch(topic, msg):
+    model.instance.update_by_mqtt(topic.decode(), msg.decode())

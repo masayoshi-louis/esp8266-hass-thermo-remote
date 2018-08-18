@@ -3,8 +3,8 @@ import json
 
 import machine
 import ubinascii
+import umqtt.simple
 import utime as time
-from umqtt import simple
 
 from config import *
 
@@ -13,7 +13,7 @@ gc.collect()
 _client = None
 
 
-class MQTTClient(simple.MQTTClient):
+class MQTTClient(umqtt.simple.MQTTClient):
     DELAY = 2
     DEBUG = True
 
@@ -82,7 +82,7 @@ class MQTTClient(simple.MQTTClient):
             self.reconnect()
 
 
-def init(status_listener):
+def init(msg_cb, status_listener):
     global _client
     global _hb_tim
     _client = MQTTClient(client_id=ubinascii.hexlify(machine.unique_id()).decode(),
@@ -103,6 +103,19 @@ def init(status_listener):
             _client.on_reconnect(_publish_birth_msg)
             _client.on_reconnect(lambda: status_listener(True))
             _client.on_disconnected(lambda: status_listener(False))
+            _client.set_callback(msg_cb)
+            _client.subscribe("{}/climate/{}/{}".format(
+                HASS_MQTT_STATE_STREAM_PREFIX,
+                HASS_THERMOSTAT_ID[8:],
+                "state"))
+            _client.subscribe("{}/climate/{}/{}".format(
+                HASS_MQTT_STATE_STREAM_PREFIX,
+                HASS_THERMOSTAT_ID[8:],
+                "temperature"))
+            _client.subscribe("{}/climate/{}/{}".format(
+                HASS_MQTT_STATE_STREAM_PREFIX,
+                HASS_THERMOSTAT_ID[8:],
+                "operation_mode"))
             break
         except OSError:
             print("[MQTT] Connecting...")

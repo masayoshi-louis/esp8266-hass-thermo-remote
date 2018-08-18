@@ -23,7 +23,7 @@ class SensorSample:
 
 
 class ThermostatModel:
-    __slots__ = [ATTR_SETPOINT, ATTR_CURRENT_TEMPERATURE, ATTR_OP_MODE, ATTR_STATE, 'current_humidity', 'listeners']
+    __slots__ = [ATTR_SETPOINT, ATTR_CURRENT_TEMPERATURE, ATTR_OP_MODE, ATTR_STATE, 'listeners']
 
     def __init__(self):
         self.listeners = []
@@ -41,13 +41,21 @@ class ThermostatModel:
     def update_by_mqtt(self, topic: str, value: str):
         attr = topic[topic.rfind('/') + 1:]
         if attr in {ATTR_SETPOINT, ATTR_CURRENT_TEMPERATURE}:
-            setattr(self, attr, float(value))
+            v = float(value)
+            setattr(self, attr, v)
         elif attr in {ATTR_OP_MODE, ATTR_STATE}:
-            setattr(self, attr, value)
+            v = value
+            if v.startswith('"'):
+                v = v[1:]
+            if v.endswith('"'):
+                v = v[:-1]
+            setattr(self, attr, v)
+        print("[MODEL] {} = {}".format(attr, str(v)))
         self.notify_listeners()
 
-    def set_current_humidity(self, value: float):
-        self.current_humidity = value
+    def set_current_temperature(self, value: float):
+        self.current_temperature = value
+        print("[MODEL] current_temperature = {}".format(str(value)))
         self.notify_listeners()
 
     def add_listener(self, l):
