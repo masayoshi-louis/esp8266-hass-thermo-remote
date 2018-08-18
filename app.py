@@ -122,22 +122,28 @@ class SystemStatus:
         self.sensor = False
         self.hass_api = False
         self.mqtt = False
+        self.__update_led()
 
     def set_sensor(self, v: bool):
         self.sensor = v
-        self.__log("Sensor", v)
+        self.__on_update("Sensor", v)
 
     def set_hass_api(self, v: bool):
         self.hass_api = v
-        self.__log("Home assistant API", v)
+        self.__on_update("Home assistant API", v)
 
     def set_mqtt(self, v: bool):
         self.mqtt = v
-        self.__log("MQTT client", v)
+        self.__on_update("MQTT client", v)
 
-    @staticmethod
-    def __log(item: str, v: bool):
+    def __on_update(self, item: str, v: bool):
         print("{} is{} OK".format(item, '' if v else ' not'))
+        self.__update_led()
+
+    def __update_led(self):
+        led = Pin(2, Pin.OUT)
+        s = self.sensor and self.hass_api and self.mqtt
+        led.value(s)
 
 
 def mqtt_msg_dispatch(topic, msg):
