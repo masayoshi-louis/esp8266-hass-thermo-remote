@@ -50,7 +50,7 @@ def main():
 
     dht_tim = Timer(DHT_TIM_ID)
     dht_tim.init(period=10000, mode=Timer.PERIODIC,
-                 callback=_dht_updater(t_sensor_mqtt, h_sensor_mqtt, DHT2Model()))
+                 callback=dht_updater(t_sensor_mqtt, h_sensor_mqtt, DHT2Model()))
 
     mqtt.loop()
 
@@ -80,7 +80,7 @@ class DHT2Model:
         model.instance.set_current_humidity(x[1])
 
 
-def _dht_updater(*conns):
+def dht_updater(*conns):
     def f(_timer):
         schedule(dht_push_sample, conns)
 
