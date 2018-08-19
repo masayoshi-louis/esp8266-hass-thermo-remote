@@ -47,6 +47,18 @@ class DebounceEvent:
             else:
                 self.__pin = Pin(pin, Pin.IN)
 
+    @property
+    def pressed(self) -> bool:
+        return self.__status != self.__default_status
+
+    @property
+    def event_length(self) -> int:
+        return self.__event_length
+
+    @property
+    def event_count(self) -> int:
+        return self.__event_count
+
     def loop(self) -> int:
         event = EVENT_NONE
 
