@@ -9,6 +9,8 @@ import model
 import mqtt
 from bme280 import BME280
 from config import *
+from controller import Controller
+from display import BootView
 from display import init as init_display
 from display import instance as display
 from hass import ThermostatAPI as HassThermostatAPI
@@ -20,24 +22,22 @@ dht_sensor = None
 DHT_TIM_ID = const(1)
 dht_tim = None
 
-refresh_display = False
-
 
 def main():
     global dht_sensor
     global dht_tim
-    global refresh_display
 
     i2c = I2C(scl=Pin(PIN_I2C_SCL), sda=Pin(PIN_I2C_SDA))
     init_display(i2c)
-    display.render()
+
+    display.render(BootView())
 
     dht_sensor = DHTSensor(PIN_DHT)
     while 1:
         try:
             dht_sensor.sample()  # test sensor
             sys_status.set_sensor(True)
-            display.render()
+            display.render(BootView())
             break
         except OSError as e:
             print("Sensor failure", repr(e))
@@ -53,13 +53,12 @@ def main():
         cur_state = hass_thermo.get_state()
     print("[HASS] Connected")
     sys_status.set_hass_api(True)
-    display.render()
+    display.render(BootView())
 
     # max_temp = cur_state.attributes.max_temp
     # min_temp = cur_state.attributes.min_temp
 
     model.init(cur_state)
-    model.instance.add_listener(model_update_listener)
 
     # test
     # hass_thermo.set_heat_mode()
@@ -67,10 +66,9 @@ def main():
 
     mqtt.init(mqtt_msg_dispatch)
     sys_status.set_mqtt(True)
-    display.render()
+    display.render(BootView())
     time.sleep(1)
     sys_status.boot = False
-    display.render()
 
     t_sensor_mqtt = mqtt.HassMQTTTemperatureSensor(mapper=lambda x: x.t)
     t_sensor_mqtt.register({})
@@ -84,14 +82,14 @@ def main():
     dht_tim.init(period=SENSOR_SAMPLE_INTERVAL * 1000, mode=Timer.PERIODIC,
                  callback=sensor_update)
 
+    controller = Controller()
+
     if LIGHT_SLEEP_ENABLED:
         esp.sleep_type(esp.SLEEP_LIGHT)
 
     while 1:
         mqtt.loop()
-        if refresh_display:
-            display.render()
-            refresh_display = False
+        controller.loop()
 
 
 class DHTSensor:
@@ -134,8 +132,3 @@ def dht_push_sample(conns):
 
 def mqtt_msg_dispatch(topic, msg):
     model.instance.update_by_mqtt(topic.decode(), msg.decode())
-
-
-def model_update_listener():
-    global refresh_display
-    refresh_display = True
