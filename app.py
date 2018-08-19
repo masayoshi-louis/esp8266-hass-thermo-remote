@@ -19,10 +19,13 @@ dht_sensor = None
 DHT_TIM_ID = const(1)
 dht_tim = None
 
+refresh_display = False
+
 
 def main():
     global dht_sensor
     global dht_tim
+    global refresh_display
 
     i2c = I2C(scl=Pin(PIN_I2C_SCL), sda=Pin(PIN_I2C_SDA))
     init_display(i2c)
@@ -55,6 +58,7 @@ def main():
     # min_temp = cur_state.attributes.min_temp
 
     model.init(cur_state)
+    model.instance.add_listener(model_update_listener)
 
     # test
     # hass_thermo.set_heat_mode()
@@ -81,6 +85,9 @@ def main():
 
     while 1:
         mqtt.loop()
+        if refresh_display:
+            display.render()
+            refresh_display = False
 
 
 class DHTSensor:
@@ -123,3 +130,8 @@ def dht_push_sample(conns):
 
 def mqtt_msg_dispatch(topic, msg):
     model.instance.update_by_mqtt(topic.decode(), msg.decode())
+
+
+def model_update_listener():
+    global refresh_display
+    refresh_display = True
