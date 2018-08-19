@@ -1,5 +1,3 @@
-./build.sh
-
 PROJ_DIR=`pwd`
 MPY_DIR=$PROJ_DIR/../micropython/ports/esp8266
 TTY_PORT=/dev/ttyUSB0
