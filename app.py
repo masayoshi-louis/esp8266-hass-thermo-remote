@@ -1,12 +1,15 @@
 import utime as time
-from dht import DHT11
+from machine import I2C
 from machine import Pin, Timer
 from micropython import const, schedule
 
 import hass
 import model
 import mqtt
+from bme280 import BME280
 from config import *
+from display import init as init_display
+from display import instance as display
 from hass import ThermostatAPI as HassThermostatAPI
 from model import SensorSample
 from sys_status import instance as sys_status
@@ -21,11 +24,16 @@ def main():
     global dht_sensor
     global dht_tim
 
+    i2c = I2C(scl=Pin(PIN_I2C_SCL), sda=Pin(PIN_I2C_SDA))
+    init_display(i2c)
+    display.render()
+
     dht_sensor = DHTSensor(PIN_DHT)
     while 1:
         try:
             dht_sensor.sample()  # test sensor
             sys_status.set_sensor(True)
+            display.render()
             break
         except OSError as e:
             print("Sensor failure", repr(e))
@@ -41,6 +49,7 @@ def main():
         cur_state = hass_thermo.get_state()
     print("[HASS] Connected")
     sys_status.set_hass_api(True)
+    display.render()
 
     # max_temp = cur_state.attributes.max_temp
     # min_temp = cur_state.attributes.min_temp
@@ -53,7 +62,10 @@ def main():
 
     mqtt.init(mqtt_msg_dispatch)
     sys_status.set_mqtt(True)
+    display.render()
+    time.sleep(1)
     sys_status.boot = False
+    display.render()
 
     t_sensor_mqtt = mqtt.HassMQTTTemperatureSensor(mapper=lambda x: x.t)
     t_sensor_mqtt.register({})
@@ -72,15 +84,14 @@ def main():
 
 
 class DHTSensor:
-    __slots__ = ['dht', 'prev_sample']
+    __slots__ = ['driver', 'prev_sample']
 
-    def __init__(self, p):
-        self.dht = DHT11(Pin(p))
+    def __init__(self, i2c):
+        self.driver = BME280(i2c=i2c)
         self.prev_sample = SensorSample(-1000, -1000, -1000)
 
     def sample(self):
-        self.dht.measure()
-        result = SensorSample(self.dht.temperature(), self.dht.humidity(), -1000)
+        result = self.driver.sample()
         self.prev_sample = result
         print("[DHT] T = {} {}, H = {} % RH".format(result.t, TEMPERATURE_UNIT, result.h))
         return result
