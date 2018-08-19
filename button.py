@@ -1,3 +1,4 @@
+import utime as time
 from micropython import const
 
 from debounce_event import *
@@ -13,6 +14,8 @@ BUTTON_EVENT_N_CLICK = const(8)
 
 BUTTON_LNGCLICK_DELAY = const(1000)
 BUTTON_LNGLNGCLICK_DELAY = const(10000)
+
+BUTTON_CONTINUOUS_INTERVAL = const(500)
 
 
 def map_event(event, count, length) -> int:
@@ -47,3 +50,25 @@ class GenericButton(DebounceEvent):
             cb(map_event(e, c, l))
 
         super().set_callback(raw_cb)
+
+
+class ContinuousButton(DebounceEvent):
+    __slots__ = ['__last_trigger', '__interval', '__my_cb']
+
+    def __init__(self, interval: int = BUTTON_CONTINUOUS_INTERVAL, **kwargs):
+        super().__init__(**kwargs)
+        self.__interval = interval
+        self.__last_trigger = 0
+        self.__my_cb = None
+
+    def loop(self) -> int:
+        event = super().loop()
+        if event == EVENT_PRESSED or (self.pressed and time.ticks_ms() - self.__last_trigger > self.__interval):
+            self.__last_trigger = time.ticks_ms()
+            if self.__my_cb is not None:
+                self.__my_cb(BUTTON_EVENT_PRESSED)
+            return BUTTON_EVENT_PRESSED
+        return BUTTON_EVENT_NONE
+
+    def set_callback(self, cb):
+        self.__my_cb = cb
