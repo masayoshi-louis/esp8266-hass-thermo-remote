@@ -7,7 +7,9 @@ from micropython import const, schedule
 import hass
 import model
 import mqtt
+from button import ContinuousButton, GenericButton
 from config import *
+from debounce_event import BUTTON_DEFAULT_HIGH, BUTTON_PUSHBUTTON, BUTTON_SET_PULLUP
 from hass import ThermostatAPI as HassThermostatAPI
 from model import SensorSample
 from sys_status import instance as sys_status
@@ -68,10 +70,30 @@ def main():
     dht_tim.init(period=SENSOR_SAMPLE_INTERVAL * 1000, mode=Timer.PERIODIC,
                  callback=sensor_update)
 
-    esp.sleep_type(esp.SLEEP_LIGHT)
+    btn1 = GenericButton(pin=PIN_BTN_1,
+                         mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
+                         repeat=300)
+    btn2 = GenericButton(pin=PIN_BTN_2,
+                         mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
+                         repeat=300)
+    btn3 = ContinuousButton(pin=PIN_BTN_3,
+                            mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
+                            interval=250)
+    btn4 = ContinuousButton(pin=PIN_BTN_4,
+                            mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
+                            interval=250)
 
+    # test
+    btn4.set_callback(lambda _: print("btn4 pressed"))
+
+    if LIGHT_SLEEP_ENABLED:
+        esp.sleep_type(esp.SLEEP_LIGHT)
     while 1:
         mqtt.loop()
+        btn1.loop()
+        btn2.loop()
+        btn3.loop()
+        btn4.loop()
 
 
 class DHTSensor:

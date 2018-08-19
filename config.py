@@ -25,3 +25,5 @@ PIN_BTN_1 = 0  # D3
 PIN_BTN_2 = 14  # D5
 PIN_BTN_3 = 12  # D6
 PIN_BTN_4 = 13  # D7
+
+LIGHT_SLEEP_ENABLED = False
