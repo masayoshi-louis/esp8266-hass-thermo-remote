@@ -1,4 +1,8 @@
+import esp
+
 from button import *
+
+esp.sleep_type(esp.SLEEP_LIGHT)
 
 
 def loop_generic():
