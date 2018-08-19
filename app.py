@@ -1,3 +1,4 @@
+import esp
 import utime as time
 from machine import I2C
 from machine import Pin, Timer
@@ -82,6 +83,9 @@ def main():
     sensor_update(None)
     dht_tim.init(period=SENSOR_SAMPLE_INTERVAL * 1000, mode=Timer.PERIODIC,
                  callback=sensor_update)
+
+    if LIGHT_SLEEP_ENABLED:
+        esp.sleep_type(esp.SLEEP_LIGHT)
 
     while 1:
         mqtt.loop()

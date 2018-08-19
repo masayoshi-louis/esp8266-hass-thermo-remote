@@ -10,6 +10,8 @@ cd $PROJ_DIR
 
 cp -t ../micropython/ports/esp8266/modules \
   sys_status.py \
+  debounce_event.py \
+  button.py \
   bme280.py \
   hass.py \
   model.py \
