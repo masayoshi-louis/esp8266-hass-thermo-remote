@@ -51,9 +51,10 @@ class Controller:
             self.__render()
             self.__refresh_display = False
         # call home assistant services
-        if self.__local_changes.is_stable(ACTION_DELAY):
+        if self.__local_changes.is_changed and self.__local_changes.is_stable(ACTION_DELAY):
             try:
                 self.__sync_to_hass()
+                self.__refresh_display = True
             except OSError:
                 sys_status.set_hass_api(False)
 
@@ -71,7 +72,6 @@ class Controller:
             self.__hass_thermo_api.set_temperature(self.__local_changes.setpoint)
         # clear local changes
         self.__local_changes.reset()
-        self.__refresh_display = True
 
     def __on_model_updated(self):
         self.__refresh_display = True

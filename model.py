@@ -116,5 +116,9 @@ class LocalChanges:
         self.last_ts = None
         self.last_item = None
 
-    def is_stable(self, delay: int):
+    @property
+    def is_changed(self) -> bool:
+        return self.last_ts is not None
+
+    def is_stable(self, delay: int) -> bool:
         return time.ticks_ms() - self.last_ts > delay
