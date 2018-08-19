@@ -23,8 +23,7 @@ class DebounceEvent:
     def __init__(self, pin: int,
                  mode: int = BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH,
                  delay: int = DEBOUNCE_DELAY,
-                 repeat: int = REPEAT_DELAY,
-                 callback=None):
+                 repeat: int = REPEAT_DELAY):
         self.__mode = mode & 0x01
         self.__default_status = (mode & BUTTON_DEFAULT_HIGH) > 0
         self.__status = self.__default_status
@@ -35,7 +34,7 @@ class DebounceEvent:
         self.__event_start = 0
         self.__event_length = 0
         self.__event_count = 0
-        self.__cb = callback
+        self.__cb = None
         if pin == 16:
             if self.__default_status:
                 self.__pin = Pin(pin, Pin.IN)
@@ -46,6 +45,9 @@ class DebounceEvent:
                 self.__pin = Pin(pin, Pin.IN, Pin.PULL_UP)
             else:
                 self.__pin = Pin(pin, Pin.IN)
+
+    def set_callback(self, cb):
+        self.__cb = cb
 
     @property
     def pressed(self) -> bool:
