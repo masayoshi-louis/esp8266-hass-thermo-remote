@@ -1,3 +1,5 @@
+import utime as time
+
 OP_MODE_OFF = 'off'
 OP_MODE_HEAT = 'heat'
 
@@ -70,3 +72,46 @@ def init(init_data: dict):
     global instance
     instance = ThermostatModel()
     instance.update(init_data)
+
+
+class LocalChanges:
+    __slots__ = [
+        'setpoint',
+        'op_mode',
+        'last_ts',
+        'last_item'
+    ]
+
+    def __init__(self):
+        self.setpoint = None
+        self.op_mode = None
+        self.last_ts = None
+        self.last_item = None
+
+    def flip_op_mode(self):
+        if self.op_mode is None:
+            current = getattr(instance, ATTR_OP_MODE)
+        else:
+            current = self.op_mode
+        # flip mode
+        if current == OP_MODE_OFF:
+            self.op_mode = OP_MODE_HEAT
+        else:
+            self.op_mode = OP_MODE_OFF
+        self.last_ts = time.ticks_ms()
+        self.last_item = ATTR_SETPOINT
+
+    def setpoint(self, delta: float):
+        if self.setpoint is None:
+            current = getattr(instance, ATTR_SETPOINT)
+        else:
+            current = self.setpoint
+        self.setpoint = current + delta
+        self.last_ts = time.ticks_ms()
+        self.last_item = ATTR_SETPOINT
+
+    def reset(self):
+        self.setpoint = None
+        self.op_mode = None
+        self.last_ts = None
+        self.last_item = None

@@ -5,8 +5,7 @@ from button import ContinuousButton, GenericButton, BUTTON_EVENT_CLICK, BUTTON_E
 from config import *
 from debounce_event import BUTTON_DEFAULT_HIGH, BUTTON_PUSHBUTTON, BUTTON_SET_PULLUP
 from hass import ThermostatAPI
-from model import ATTR_OP_MODE, ATTR_SETPOINT
-from model import OP_MODE_HEAT, OP_MODE_OFF
+from model import OP_MODE_OFF, LocalChanges
 from model import instance as model
 from sys_status import instance as sys_status
 
@@ -21,20 +20,14 @@ class Controller:
         '__btn2',
         '__btn3',
         '__btn4',
-        '__new_setpoint',
-        '__new_op_mode',
-        '__last_act_ts',
-        '__last_act_item'
+        '__local_changes'
     ]
 
     def __init__(self, hass_thermo_api: ThermostatAPI):
         self.__hass_thermo_api = hass_thermo_api
         self.__refresh_display = False
         model.add_listener(self.__on_model_updated)
-        self.__new_op_mode = None
-        self.__new_setpoint = None
-        self.__last_act_ts = None
-        self.__last_act_item = None
+        self.__local_changes = LocalChanges()
         self.__btn1 = GenericButton(pin=PIN_BTN_1,
                                     mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
                                     repeat=300)
@@ -70,18 +63,15 @@ class Controller:
         pass
 
     def __sync_to_hass(self):
-        if self.__new_op_mode is not None:
-            if self.__new_op_mode == OP_MODE_OFF:
+        if self.__local_changes.op_mode is not None:
+            if self.__local_changes.op_mode == OP_MODE_OFF:
                 self.__hass_thermo_api.turn_off()
             else:
                 self.__hass_thermo_api.set_heat_mode()
-        if self.__new_setpoint is not None:
-            self.__hass_thermo_api.set_temperature(self.__new_setpoint)
-        # clear local
-        self.__last_act_ts = None
-        self.__last_act_item = None
-        self.__new_op_mode = None
-        self.__new_setpoint = None
+        if self.__local_changes.setpoint is not None:
+            self.__hass_thermo_api.set_temperature(self.__local_changes.setpoint)
+        # clear local changes
+        self.__local_changes.reset()
         self.__refresh_display = True
 
     def __on_model_updated(self):
@@ -89,33 +79,15 @@ class Controller:
 
     def __mode_btn_loop(self, btn: GenericButton):
         if btn.loop() == BUTTON_EVENT_CLICK:
-            if self.__new_op_mode is None:
-                current = getattr(model, ATTR_OP_MODE)
-            else:
-                current = self.__new_op_mode
-            # flip mode
-            if current == OP_MODE_OFF:
-                self.__new_op_mode = OP_MODE_HEAT
-            else:
-                self.__new_op_mode = OP_MODE_OFF
+            self.__local_changes.flip_op_mode()
             self.__refresh_display = True
-            self.__last_act_ts = time.ticks_ms()
-            self.__last_act_item = ATTR_OP_MODE
 
     def __setpoint_up_btn_loop(self, btn: ContinuousButton):
         if btn.loop() == BUTTON_EVENT_PRESSED:
-            self.__setpoint(0.5)
+            self.__local_changes.setpoint(0.5)
+            self.__refresh_display = True
 
     def __setpoint_down_btn_loop(self, btn: ContinuousButton):
         if btn.loop() == BUTTON_EVENT_PRESSED:
-            self.__setpoint(-0.5)
-
-    def __setpoint(self, delta: float):
-        if self.__new_setpoint is None:
-            current = getattr(model, ATTR_SETPOINT)
-        else:
-            current = self.__new_setpoint
-        self.__new_setpoint = current + delta
-        self.__refresh_display = True
-        self.__last_act_ts = time.ticks_ms()
-        self.__last_act_item = ATTR_SETPOINT
+            self.__local_changes.setpoint(-0.5)
+            self.__refresh_display = True
