@@ -115,3 +115,6 @@ class LocalChanges:
         self.op_mode = None
         self.last_ts = None
         self.last_item = None
+
+    def is_stable(self, delay: int):
+        return time.ticks_ms() - self.last_ts > delay

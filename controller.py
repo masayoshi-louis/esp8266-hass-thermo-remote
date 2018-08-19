@@ -1,4 +1,3 @@
-import utime as time
 from micropython import const
 
 from button import ContinuousButton, GenericButton, BUTTON_EVENT_CLICK, BUTTON_EVENT_PRESSED
@@ -52,7 +51,7 @@ class Controller:
             self.__render()
             self.__refresh_display = False
         # call home assistant services
-        if time.ticks_ms() - self.__last_act_ts > ACTION_DELAY:
+        if self.__local_changes.is_stable(ACTION_DELAY):
             try:
                 self.__sync_to_hass()
             except OSError:
