@@ -1,15 +1,38 @@
-from button import ContinuousButton, GenericButton
+import utime as time
+from micropython import const
+
+from button import ContinuousButton, GenericButton, BUTTON_EVENT_CLICK, BUTTON_EVENT_PRESSED
 from config import *
 from debounce_event import BUTTON_DEFAULT_HIGH, BUTTON_PUSHBUTTON, BUTTON_SET_PULLUP
+from hass import ThermostatAPI
+from model import ATTR_OP_MODE, ATTR_SETPOINT
+from model import OP_MODE_HEAT, OP_MODE_OFF
 from model import instance as model
+from sys_status import instance as sys_status
+
+ACTION_DELAY = const(2000)
 
 
 class Controller:
-    __slots__ = ['__refresh_display', '__btn1', '__btn2', '__btn3', '__btn4']
+    __slots__ = [
+        '__hass_thermo_api',
+        '__refresh_display',
+        '__btn1',
+        '__btn2',
+        '__btn3',
+        '__btn4',
+        '__new_setpoint',
+        '__new_op_mode',
+        '__last_act'
+    ]
 
-    def __init__(self):
+    def __init__(self, hass_thermo_api: ThermostatAPI):
+        self.__hass_thermo_api = hass_thermo_api
         self.__refresh_display = False
         model.add_listener(self.__on_model_updated)
+        self.__new_op_mode = None
+        self.__new_setpoint = None
+        self.__last_act = None
         self.__btn1 = GenericButton(pin=PIN_BTN_1,
                                     mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
                                     repeat=300)
@@ -24,10 +47,69 @@ class Controller:
                                        interval=250)
 
     def loop(self):
-        self.__btn1.loop()
-        self.__btn2.loop()
-        self.__btn3.loop()
-        self.__btn4.loop()
+        # button actions
+        self.__mode_btn_loop(self.__btn1)
+        # TODO btn2
+        self.__setpoint_up_btn_loop(self.__btn3)
+        self.__setpoint_down_btn_loop(self.__btn4)
+        # render view
+        if self.__refresh_display:
+            self.__render()
+            self.__refresh_display = False
+        # call home assistant services
+        if time.ticks_ms() - self.__last_act > ACTION_DELAY:
+            try:
+                self.__sync_to_hass()
+            except OSError:
+                sys_status.set_hass_api(False)
+
+    def __render(self):
+        # TODO
+        pass
+
+    def __sync_to_hass(self):
+        if self.__new_op_mode != getattr(model, ATTR_OP_MODE):
+            if self.__new_op_mode == OP_MODE_OFF:
+                self.__hass_thermo_api.turn_off()
+            else:
+                self.__hass_thermo_api.set_heat_mode()
+        if self.__new_setpoint != getattr(model, ATTR_SETPOINT):
+            self.__hass_thermo_api.set_temperature(self.__new_setpoint)
+        # clear local
+        self.__last_act = None
+        self.__new_op_mode = None
+        self.__new_setpoint = None
 
     def __on_model_updated(self):
         self.__refresh_display = True
+
+    def __mode_btn_loop(self, btn: GenericButton):
+        if btn.loop() == BUTTON_EVENT_CLICK:
+            if self.__new_op_mode is None:
+                current = getattr(model, ATTR_OP_MODE)
+            else:
+                current = self.__new_op_mode
+            # flip mode
+            if current == OP_MODE_OFF:
+                self.__new_op_mode = OP_MODE_HEAT
+            else:
+                self.__new_op_mode = OP_MODE_OFF
+            self.__refresh_display = True
+            self.__last_act = time.ticks_ms()
+
+    def __setpoint_up_btn_loop(self, btn: ContinuousButton):
+        if btn.loop() == BUTTON_EVENT_PRESSED:
+            self.__setpoint(0.5)
+
+    def __setpoint_down_btn_loop(self, btn: ContinuousButton):
+        if btn.loop() == BUTTON_EVENT_PRESSED:
+            self.__setpoint(-0.5)
+
+    def __setpoint(self, delta: float):
+        if self.__new_setpoint is None:
+            current = getattr(model, ATTR_SETPOINT)
+        else:
+            current = self.__new_setpoint
+        self.__new_setpoint = current + delta
+        self.__refresh_display = True
+        self.__last_act = time.ticks_ms()
