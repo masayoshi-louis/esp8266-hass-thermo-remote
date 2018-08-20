@@ -1,6 +1,7 @@
 import esp
 import machine
 import utime as time
+from dht import DHT22
 from machine import I2C
 from machine import Pin, Timer
 from micropython import const, schedule
@@ -8,7 +9,6 @@ from micropython import const, schedule
 import hass
 import model
 import mqtt
-from bme280 import BME280
 from config import *
 from controller import Controller
 from display import BootView
@@ -41,7 +41,7 @@ def main():
 
     while 1:
         try:
-            dht_sensor = DHTSensor(i2c)
+            dht_sensor = DHTSensor(PIN_DHT)
             dht_sensor.sample()  # test sensor
             sys_status.set_sensor(True)
             display.render(BootView())
@@ -97,12 +97,13 @@ def main():
 class DHTSensor:
     __slots__ = ['driver', 'prev_sample']
 
-    def __init__(self, i2c):
-        self.driver = BME280(i2c=i2c, address=SENSOR_I2C_ADDR)
+    def __init__(self, pin: int):
+        self.driver = DHT22(Pin(pin))
         self.prev_sample = SensorSample(-1000, -1000, -1000)
 
     def sample(self):
-        result = self.driver.sample()
+        self.driver.measure()
+        result = SensorSample(self.driver.temperature(), self.driver.humidity(), -1000)
         self.prev_sample = result
         print("[DHT] T = {} {}, H = {} % RH, P = {} hPa".format(result.t, TEMPERATURE_UNIT, result.h, result.p))
         return result
