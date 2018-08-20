@@ -25,7 +25,7 @@ class SensorSample:
 
 
 class ThermostatModel:
-    __slots__ = [ATTR_SETPOINT, ATTR_CURRENT_TEMPERATURE, ATTR_OP_MODE, ATTR_STATE, 'sensor_sample', 'listeners']
+    __slots__ = ['temperature', 'current_temperature', 'operation_mode', 'state', 'sensor_sample', 'listeners']
 
     def __init__(self):
         self.listeners = []
