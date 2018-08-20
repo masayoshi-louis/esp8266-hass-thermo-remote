@@ -5,7 +5,6 @@ from config import *
 from debounce_event import BUTTON_DEFAULT_HIGH, BUTTON_PUSHBUTTON, BUTTON_SET_PULLUP
 from hass import ThermostatAPI
 from model import LocalChanges
-from model import instance as model
 from sys_status import instance as sys_status
 
 ACTION_DELAY = const(2000)
@@ -23,6 +22,7 @@ class Controller:
     ]
 
     def __init__(self, hass_thermo_api: ThermostatAPI, local_changes: LocalChanges):
+        from model import instance as model
         self.hass_thermo_api = hass_thermo_api
         self.refresh_display = False
         model.add_listener(self._on_model_updated)
