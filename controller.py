@@ -4,7 +4,7 @@ from button import ContinuousButton, GenericButton, BUTTON_EVENT_CLICK, BUTTON_E
 from config import *
 from debounce_event import BUTTON_DEFAULT_HIGH, BUTTON_PUSHBUTTON, BUTTON_SET_PULLUP
 from hass import ThermostatAPI
-from model import OP_MODE_OFF, LocalChanges
+from model import LocalChanges
 from model import instance as model
 from sys_status import instance as sys_status
 
@@ -53,7 +53,7 @@ class Controller:
         # call home assistant services
         if self.__local_changes.is_changed and self.__local_changes.is_stable(ACTION_DELAY):
             try:
-                self.__sync_to_hass()
+                self.__local_changes.save_to(self.__hass_thermo_api)
                 self.__refresh_display = True
             except OSError:
                 sys_status.set_hass_api(False)
@@ -61,17 +61,6 @@ class Controller:
     def __render(self):
         # TODO
         pass
-
-    def __sync_to_hass(self):
-        if self.__local_changes.op_mode is not None:
-            if self.__local_changes.op_mode == OP_MODE_OFF:
-                self.__hass_thermo_api.turn_off()
-            else:
-                self.__hass_thermo_api.set_heat_mode()
-        if self.__local_changes.setpoint is not None:
-            self.__hass_thermo_api.set_temperature(self.__local_changes.setpoint)
-        # clear local changes
-        self.__local_changes.reset()
 
     def __on_model_updated(self):
         self.__refresh_display = True

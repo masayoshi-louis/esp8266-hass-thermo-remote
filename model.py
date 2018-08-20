@@ -1,5 +1,7 @@
 import utime as time
 
+from hass import ThermostatAPI
+
 OP_MODE_OFF = 'off'
 OP_MODE_HEAT = 'heat'
 
@@ -112,6 +114,17 @@ class LocalChanges:
         self.setpoint = min(max(current + delta, self.min_t), self.max_t)
         self.last_ts = time.ticks_ms()
         self.last_item = ATTR_SETPOINT
+
+    def save_to(self, api: ThermostatAPI):
+        if self.op_mode is not None:
+            if self.op_mode == OP_MODE_OFF:
+                api.turn_off()
+            else:
+                api.set_heat_mode()
+        if self.setpoint is not None:
+            api.set_temperature(self.setpoint)
+        # clear local changes
+        self.reset()
 
     def reset(self):
         self.setpoint = None
