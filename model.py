@@ -78,14 +78,18 @@ class LocalChanges:
         'setpoint',
         'op_mode',
         'last_ts',
-        'last_item'
+        'last_item',
+        'max_t',
+        'min_t'
     ]
 
-    def __init__(self):
+    def __init__(self, max_temp: float, min_temp: float):
         self.setpoint = None
         self.op_mode = None
         self.last_ts = None
         self.last_item = None
+        self.max_t = max_temp
+        self.min_t = min_temp
 
     def flip_op_mode(self):
         if self.op_mode is None:
@@ -100,12 +104,12 @@ class LocalChanges:
         self.last_ts = time.ticks_ms()
         self.last_item = ATTR_SETPOINT
 
-    def setpoint(self, delta: float):
+    def setpoint_add(self, delta: float):
         if self.setpoint is None:
             current = getattr(instance, ATTR_SETPOINT)
         else:
             current = self.setpoint
-        self.setpoint = current + delta
+        self.setpoint = min(max(current + delta, self.min_t), self.max_t)
         self.last_ts = time.ticks_ms()
         self.last_item = ATTR_SETPOINT
 

@@ -22,11 +22,11 @@ class Controller:
         '__local_changes'
     ]
 
-    def __init__(self, hass_thermo_api: ThermostatAPI):
+    def __init__(self, hass_thermo_api: ThermostatAPI, local_changes: LocalChanges):
         self.__hass_thermo_api = hass_thermo_api
         self.__refresh_display = False
         model.add_listener(self.__on_model_updated)
-        self.__local_changes = LocalChanges()
+        self.__local_changes = local_changes
         self.__btn1 = GenericButton(pin=PIN_BTN_1,
                                     mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
                                     repeat=300)
@@ -83,10 +83,10 @@ class Controller:
 
     def __setpoint_up_btn_loop(self, btn: ContinuousButton):
         if btn.loop() == BUTTON_EVENT_PRESSED:
-            self.__local_changes.setpoint(0.5)
+            self.__local_changes.setpoint_add(0.5)
             self.__refresh_display = True
 
     def __setpoint_down_btn_loop(self, btn: ContinuousButton):
         if btn.loop() == BUTTON_EVENT_PRESSED:
-            self.__local_changes.setpoint(-0.5)
+            self.__local_changes.setpoint_add(-0.5)
             self.__refresh_display = True

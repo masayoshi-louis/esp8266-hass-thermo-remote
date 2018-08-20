@@ -14,7 +14,7 @@ from display import BootView
 from display import init as init_display
 from display import instance as display
 from hass import ThermostatAPI as HassThermostatAPI
-from model import SensorSample
+from model import SensorSample, LocalChanges
 from sys_status import instance as sys_status
 
 dht_sensor = None
@@ -55,14 +55,7 @@ def main():
     sys_status.set_hass_api(True)
     display.render(BootView())
 
-    # max_temp = cur_state.attributes.max_temp
-    # min_temp = cur_state.attributes.min_temp
-
     model.init(cur_state)
-
-    # test
-    # hass_thermo.set_heat_mode()
-    # hass_thermo.set_temperature(30)
 
     mqtt.init(mqtt_msg_dispatch)
     sys_status.set_mqtt(True)
@@ -82,7 +75,9 @@ def main():
     dht_tim.init(period=SENSOR_SAMPLE_INTERVAL * 1000, mode=Timer.PERIODIC,
                  callback=sensor_update)
 
-    controller = Controller()
+    controller = Controller(hass_thermo_api=hass_thermo,
+                            local_changes=LocalChanges(max_temp=float(cur_state.attributes.max_temp),
+                                                       min_temp=float(cur_state.attributes.min_temp)))
 
     if LIGHT_SLEEP_ENABLED:
         esp.sleep_type(esp.SLEEP_LIGHT)
