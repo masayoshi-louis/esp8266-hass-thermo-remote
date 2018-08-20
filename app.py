@@ -1,4 +1,5 @@
 import esp
+import machine
 import utime as time
 from machine import I2C
 from machine import Pin, Timer
@@ -26,8 +27,13 @@ def main():
     global dht_sensor
     global dht_tim
 
-    i2c = I2C(scl=Pin(PIN_I2C_SCL), sda=Pin(PIN_I2C_SDA))
-    init_display(i2c)
+    try:
+        i2c = I2C(scl=Pin(PIN_I2C_SCL), sda=Pin(PIN_I2C_SDA))
+        init_display(i2c)
+    except OSError as e:
+        print("Can not initialize display!", repr(e))
+        time.sleep(10)
+        machine.reset()
 
     from display import instance as display
     display.render(BootView())
