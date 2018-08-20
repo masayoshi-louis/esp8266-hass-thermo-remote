@@ -32,7 +32,7 @@ def main():
     from display import instance as display
     display.render(BootView())
 
-    dht_sensor = DHTSensor(PIN_DHT)
+    dht_sensor = DHTSensor(i2c)
     while 1:
         try:
             dht_sensor.sample()  # test sensor
