@@ -97,7 +97,7 @@ class DHTSensor:
     def sample(self):
         result = self.driver.sample()
         self.prev_sample = result
-        print("[DHT] T = {} {}, H = {} % RH".format(result.t, TEMPERATURE_UNIT, result.h))
+        print("[DHT] T = {} {}, H = {} % RH, P = {} hPa".format(result.t, TEMPERATURE_UNIT, result.h, result.p))
         return result
 
 
