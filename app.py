@@ -12,7 +12,7 @@ import mqtt
 from bme280 import BME280
 from config import *
 from controller import Controller
-from display import BootView
+from display import sys_status_view
 from display import init as init_display
 from hass import ThermostatAPI as HassThermostatAPI
 from model import SensorSample, LocalChanges
@@ -38,14 +38,14 @@ def main():
         return
 
     from display import instance as display
-    display.render(BootView())
+    display.render(sys_status_view)
 
     while 1:
         try:
             dht_sensor = DHTSensor(pin=PIN_DHT, i2c=i2c)
             dht_sensor.sample()  # test sensor
             sys_status.set_sensor(True)
-            display.render(BootView())
+            display.render(sys_status_view)
             break
         except OSError as e:
             print("Sensor failure", repr(e))
@@ -61,16 +61,16 @@ def main():
         cur_state = hass_thermo.get_state()
     print("[HASS] Connected")
     sys_status.set_hass_api(True)
-    display.render(BootView())
+    display.render(sys_status_view)
 
     model.init(cur_state)
 
     mqtt.init(mqtt_msg_dispatch)
     sys_status.set_mqtt(True)
-    display.render(BootView())
+    display.render(sys_status_view)
     time.sleep(1)
     sys_status.boot = False
-    display.render(BootView())
+    display.render(sys_status_view)
 
     t_sensor_mqtt = mqtt.HassMQTTTemperatureSensor(mapper=lambda x: x.t)
     t_sensor_mqtt.register({})
