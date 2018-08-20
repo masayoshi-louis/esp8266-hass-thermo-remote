@@ -70,6 +70,7 @@ def main():
     display.render(BootView())
     time.sleep(1)
     sys_status.boot = False
+    display.render(BootView())
 
     t_sensor_mqtt = mqtt.HassMQTTTemperatureSensor(mapper=lambda x: x.t)
     t_sensor_mqtt.register({})
