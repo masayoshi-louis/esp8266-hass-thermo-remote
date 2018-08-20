@@ -12,7 +12,6 @@ from config import *
 from controller import Controller
 from display import BootView
 from display import init as init_display
-from display import instance as display
 from hass import ThermostatAPI as HassThermostatAPI
 from model import SensorSample, LocalChanges
 from sys_status import instance as sys_status
@@ -30,6 +29,7 @@ def main():
     i2c = I2C(scl=Pin(PIN_I2C_SCL), sda=Pin(PIN_I2C_SDA))
     init_display(i2c)
 
+    from display import instance as display
     display.render(BootView())
 
     dht_sensor = DHTSensor(PIN_DHT)
