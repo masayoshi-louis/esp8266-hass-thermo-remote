@@ -34,13 +34,14 @@ def main():
         print("Can not initialize display!", repr(e))
         time.sleep(10)
         machine.reset()
+        return
 
     from display import instance as display
     display.render(BootView())
 
-    dht_sensor = DHTSensor(i2c)
     while 1:
         try:
+            dht_sensor = DHTSensor(i2c)
             dht_sensor.sample()  # test sensor
             sys_status.set_sensor(True)
             display.render(BootView())
