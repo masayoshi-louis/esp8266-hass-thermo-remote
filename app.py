@@ -108,7 +108,7 @@ class DHTSensor:
 
 class DHT2Model:
     def on_next(self, x: SensorSample):
-        model.instance.set_current_temperature(float(x.t))
+        model.instance.update_sensor_sample(x)
 
 
 def dht_updater(*conns):

@@ -25,15 +25,15 @@ class SensorSample:
 
 
 class ThermostatModel:
-    __slots__ = [ATTR_SETPOINT, ATTR_CURRENT_TEMPERATURE, ATTR_OP_MODE, ATTR_STATE, 'listeners']
+    __slots__ = [ATTR_SETPOINT, ATTR_CURRENT_TEMPERATURE, ATTR_OP_MODE, ATTR_STATE, 'sensor_sample', 'listeners']
 
     def __init__(self):
         self.listeners = []
-        self.current_humidity = 0.0
         self.temperature = 0
         self.current_temperature = 0
         self.operation_mode = OP_MODE_OFF
         self.state = STATE_OFF
+        self.sensor_sample = None
 
     def update(self, data: dict):
         for key, value in data.items():
@@ -55,9 +55,8 @@ class ThermostatModel:
         print("[MODEL] {} = {}".format(attr, str(v)))
         self.notify_listeners()
 
-    def set_current_temperature(self, value: float):
-        self.current_temperature = value
-        print("[MODEL] current_temperature = {}".format(str(value)))
+    def update_sensor_sample(self, value: SensorSample):
+        self.sensor_sample = value
         self.notify_listeners()
 
     def add_listener(self, l):
