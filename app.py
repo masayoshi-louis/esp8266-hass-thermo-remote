@@ -91,7 +91,7 @@ class DHTSensor:
     __slots__ = ['driver', 'prev_sample']
 
     def __init__(self, i2c):
-        self.driver = BME280(i2c=i2c)
+        self.driver = BME280(i2c=i2c, address=SENSOR_I2C_ADDR)
         self.prev_sample = SensorSample(-1000, -1000, -1000)
 
     def sample(self):
