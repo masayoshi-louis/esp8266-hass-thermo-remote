@@ -13,69 +13,69 @@ ACTION_DELAY = const(2000)
 
 class Controller:
     __slots__ = [
-        '__hass_thermo_api',
-        '__refresh_display',
-        '__btn1',
-        '__btn2',
-        '__btn3',
-        '__btn4',
-        '__local_changes'
+        'hass_thermo_api',
+        'refresh_display',
+        'btn1',
+        'btn2',
+        'btn3',
+        'btn4',
+        'local_changes'
     ]
 
     def __init__(self, hass_thermo_api: ThermostatAPI, local_changes: LocalChanges):
-        self.__hass_thermo_api = hass_thermo_api
-        self.__refresh_display = False
-        model.add_listener(self.__on_model_updated)
-        self.__local_changes = local_changes
-        self.__btn1 = GenericButton(pin=PIN_BTN_1,
-                                    mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
-                                    repeat=300)
-        self.__btn2 = GenericButton(pin=PIN_BTN_2,
-                                    mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
-                                    repeat=300)
-        self.__btn3 = ContinuousButton(pin=PIN_BTN_3,
-                                       mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
-                                       interval=250)
-        self.__btn4 = ContinuousButton(pin=PIN_BTN_4,
-                                       mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
-                                       interval=250)
+        self.hass_thermo_api = hass_thermo_api
+        self.refresh_display = False
+        model.add_listener(self._on_model_updated)
+        self.local_changes = local_changes
+        self.btn1 = GenericButton(pin=PIN_BTN_1,
+                                  mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
+                                  repeat=300)
+        self.btn2 = GenericButton(pin=PIN_BTN_2,
+                                  mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
+                                  repeat=300)
+        self.btn3 = ContinuousButton(pin=PIN_BTN_3,
+                                     mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
+                                     interval=250)
+        self.btn4 = ContinuousButton(pin=PIN_BTN_4,
+                                     mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
+                                     interval=250)
 
     def loop(self):
         # button actions
-        self.__mode_btn_loop(self.__btn1)
+        self._mode_btn_loop(self.btn1)
         # TODO btn2
-        self.__setpoint_up_btn_loop(self.__btn3)
-        self.__setpoint_down_btn_loop(self.__btn4)
+        self._setpoint_up_btn_loop(self.btn3)
+        self._setpoint_down_btn_loop(self.btn4)
         # render view
-        if self.__refresh_display:
-            self.__render()
-            self.__refresh_display = False
+        if self.refresh_display:
+            self._render()
+            self.refresh_display = False
         # call home assistant services
-        if self.__local_changes.is_changed and self.__local_changes.is_stable(ACTION_DELAY):
+        if self.local_changes.is_changed and self.local_changes.is_stable(ACTION_DELAY):
             try:
-                self.__local_changes.save_to(self.__hass_thermo_api)
-                self.__refresh_display = True
+                self.local_changes.save_to(self.hass_thermo_api)
+                self.refresh_display = True
             except OSError:
                 sys_status.set_hass_api(False)
 
-    def __render(self):
+    def _render(self):
         # TODO
         pass
 
-    def __on_model_updated(self):
-        self.__refresh_display = True
+    def _on_model_updated(self):
+        self.refresh_display = True
 
-    def __mode_btn_loop(self, btn: GenericButton):
+    def _mode_btn_loop(self, btn: GenericButton):
         if btn.loop() == BUTTON_EVENT_CLICK:
-            self.__local_changes.flip_op_mode()
-            self.__refresh_display = True
+            self.local_changes.flip_op_mode()
+            self.refresh_display = True
 
-    def __setpoint_up_btn_loop(self, btn: ContinuousButton):
+    def _setpoint_up_btn_loop(self, btn: ContinuousButton):
         if btn.loop() == BUTTON_EVENT_PRESSED:
-            self.__local_changes.setpoint_add(0.5)
-            self.__refresh_display = True
+            self.local_changes.setpoint_add(0.5)
+            self.refresh_display = True
 
-    def __setpoint_down_btn_loop(self, btn: ContinuousButton):
+    def _setpoint_down_btn_loop(self, btn: ContinuousButton):
         if btn.loop() == BUTTON_EVENT_PRESSED:
-            self.__local_changes.setpoint_add(-0.5)
-            self.__refresh_display = True
+            self.local_changes.setpoint_add(-0.5)
+            self.refresh_display = True

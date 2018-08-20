@@ -53,22 +53,22 @@ class GenericButton(DebounceEvent):
 
 
 class ContinuousButton(DebounceEvent):
-    __slots__ = ['__last_trigger', '__interval', '__my_cb']
+    __slots__ = ['_last_trigger', '_interval', '_my_cb']
 
     def __init__(self, interval: int = BUTTON_CONTINUOUS_INTERVAL, **kwargs):
         super().__init__(**kwargs)
-        self.__interval = interval
-        self.__last_trigger = 0
-        self.__my_cb = None
+        self._interval = interval
+        self._last_trigger = 0
+        self._my_cb = None
 
     def loop(self) -> int:
         event = super().loop()
-        if event == EVENT_PRESSED or (self.pressed and time.ticks_ms() - self.__last_trigger > self.__interval):
-            self.__last_trigger = time.ticks_ms()
-            if self.__my_cb is not None:
-                self.__my_cb(BUTTON_EVENT_PRESSED)
+        if event == EVENT_PRESSED or (self.pressed and time.ticks_ms() - self._last_trigger > self._interval):
+            self._last_trigger = time.ticks_ms()
+            if self._my_cb is not None:
+                self._my_cb(BUTTON_EVENT_PRESSED)
             return BUTTON_EVENT_PRESSED
         return BUTTON_EVENT_NONE
 
     def set_callback(self, cb):
-        self.__my_cb = cb
+        self._my_cb = cb

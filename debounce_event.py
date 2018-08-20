@@ -1,6 +1,6 @@
-from micropython import const
-from machine import Pin
 import utime as time
+from machine import Pin
+from micropython import const
 
 BUTTON_PUSHBUTTON = const(0)
 BUTTON_SWITCH = const(1)
@@ -17,88 +17,100 @@ EVENT_RELEASED = const(3)
 
 
 class DebounceEvent:
-    __slots__ = ['__mode', '__default_status', '__status', '__delay', '__repeat', '__pin', '__ready', '__reset_count',
-                 '__event_start', '__event_length', '__event_count', '__cb']
+    __slots__ = [
+        '_mode',
+        '_default_status',
+        '_status',
+        '_delay',
+        '_repeat',
+        '_pin',
+        '_ready',
+        '_reset_count',
+        '_event_start',
+        '_event_length',
+        '_event_count',
+        '_cb'
+    ]
 
     def __init__(self, pin: int,
                  mode: int = BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH,
                  delay: int = DEBOUNCE_DELAY,
                  repeat: int = REPEAT_DELAY):
-        self.__mode = mode & 0x01
-        self.__default_status = (mode & BUTTON_DEFAULT_HIGH) > 0
-        self.__status = self.__default_status
-        self.__delay = delay
-        self.__repeat = repeat
-        self.__ready = False
-        self.__reset_count = True
-        self.__event_start = 0
-        self.__event_length = 0
-        self.__event_count = 0
-        self.__cb = None
+        self._mode = mode & 0x01
+        self._default_status = (mode & BUTTON_DEFAULT_HIGH) > 0
+        self._status = self._default_status
+        self._delay = delay
+        self._repeat = repeat
+        self._ready = False
+        self._reset_count = True
+        self._event_start = 0
+        self._event_length = 0
+        self._event_count = 0
+        self._cb = None
         if pin == 16:
-            if self.__default_status:
-                self.__pin = Pin(pin, Pin.IN)
+            if self._default_status:
+                self._pin = Pin(pin, Pin.IN)
             else:
                 raise Exception  # there's no Pin.PULL_DOWN
         else:
             if mode & BUTTON_SET_PULLUP > 0:
-                self.__pin = Pin(pin, Pin.IN, Pin.PULL_UP)
+                self._pin = Pin(pin, Pin.IN, Pin.PULL_UP)
             else:
-                self.__pin = Pin(pin, Pin.IN)
+                self._pin = Pin(pin, Pin.IN)
 
     def set_callback(self, cb):
-        self.__cb = cb
+        self._cb = cb
 
     @property
     def pressed(self) -> bool:
-        return self.__status != self.__default_status
+        return self._status != self._default_status
 
     @property
     def event_length(self) -> int:
-        return self.__event_length
+        return self._event_length
 
     @property
     def event_count(self) -> int:
-        return self.__event_count
+        return self._event_count
 
     def loop(self) -> int:
         event = EVENT_NONE
 
-        if self.__read() != self.__status:
+        if self._read() != self._status:
             # Debounce
             start = time.ticks_ms()
-            while time.ticks_ms() - start < self.__delay:
+            while time.ticks_ms() - start < self._delay:
                 time.sleep_ms(1)
 
-            if self.__read() != self.__status:
-                self.__status = not self.__status
+            if self._read() != self._status:
+                self._status = not self._status
 
-                if self.__mode == BUTTON_SWITCH:
+                if self._mode == BUTTON_SWITCH:
                     event = EVENT_CHANGED
                 else:
-                    if self.__status == self.__default_status:  # released
-                        self.__event_length = time.ticks_ms() - self.__event_start
-                        self.__ready = True
+                    if self._status == self._default_status:  # released
+                        self._event_length = time.ticks_ms() - self._event_start
+                        self._ready = True
                     else:  # pressed
                         event = EVENT_PRESSED
-                        self.__event_start = time.ticks_ms()
-                        self.__event_length = 0
-                        if self.__reset_count:
-                            self.__event_count = 1
-                            self.__reset_count = False
+                        self._event_start = time.ticks_ms()
+                        self._event_length = 0
+                        if self._reset_count:
+                            self._event_count = 1
+                            self._reset_count = False
                         else:
-                            self.__event_count += 1
-                        self.__ready = False
+                            self._event_count += 1
+                        self._ready = False
 
-        if self.__ready and (time.ticks_ms() - self.__event_start > self.__repeat):
-            self.__ready = False
-            self.__reset_count = True
+        if self._ready and (time.ticks_ms() - self._event_start > self._repeat):
+            self._ready = False
+            self._reset_count = True
             event = EVENT_RELEASED
 
-        if event != EVENT_NONE and self.__cb is not None:
-            self.__cb(event, self.__event_count, self.__event_length)
+        if event != EVENT_NONE and self._cb is not None:
+            self._cb(event, self._event_count, self._event_length)
 
         return event
 
-    def __read(self):
-        return self.__pin.value()
+    def _read(self):
+        return self._pin.value()
