@@ -9,6 +9,7 @@ from micropython import const, schedule
 import hass
 import model
 import mqtt
+from bme280 import BME280
 from config import *
 from controller import Controller
 from display import BootView
@@ -41,7 +42,7 @@ def main():
 
     while 1:
         try:
-            dht_sensor = DHTSensor(PIN_DHT)
+            dht_sensor = DHTSensor(pin=PIN_DHT, i2c=i2c)
             dht_sensor.sample()  # test sensor
             sys_status.set_sensor(True)
             display.render(BootView())
@@ -95,15 +96,17 @@ def main():
 
 
 class DHTSensor:
-    __slots__ = ['driver', 'prev_sample']
+    __slots__ = ['driver', 'prev_sample', 'bme']
 
-    def __init__(self, pin: int):
+    def __init__(self, pin: int, i2c: I2C):
         self.driver = DHT22(Pin(pin))
+        self.bme = BME280(i2c=i2c, address=BME280_I2C_ADDR)
         self.prev_sample = SensorSample(-1000, -1000, -1000)
 
     def sample(self):
         self.driver.measure()
         result = SensorSample(self.driver.temperature(), self.driver.humidity(), -1000)
+        result.p = self.bme.sample().p
         self.prev_sample = result
         print("[DHT] T = {} {}, H = {} % RH, P = {} hPa".format(result.t, TEMPERATURE_UNIT, result.h, result.p))
         return result
