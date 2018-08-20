@@ -106,9 +106,12 @@ class DHTSensor:
     def sample(self):
         self.driver.measure()
         result = SensorSample(self.driver.temperature(), self.driver.humidity(), -1000)
-        result.p = self.bme.sample().p
+        bme_result = self.bme.sample()
+        result.p = bme_result.p
         self.prev_sample = result
-        print("[DHT] T = {} {}, H = {} % RH, P = {} hPa".format(result.t, TEMPERATURE_UNIT, result.h, result.p))
+        print("[DHT] DHT22:  T = {} {}, H = {} % RH".format(result.t, TEMPERATURE_UNIT, result.h))
+        print("[DHT] BME280: T = {} {}, H = {} % RH, P = {} hPa".format(bme_result.t, TEMPERATURE_UNIT, bme_result.h,
+                                                                        bme_result.p))
         return result
 
 
