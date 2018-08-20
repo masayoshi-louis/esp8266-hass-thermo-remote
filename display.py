@@ -15,6 +15,7 @@ class Display:
 
     def __init__(self, i2c: I2C):
         self.driver = SSD1306_I2C(i2c=i2c, addr=DISP_I2C_ADDR, width=128, height=64)
+        self.driver.init_display()
 
     def render(self, view: View):
         pass
