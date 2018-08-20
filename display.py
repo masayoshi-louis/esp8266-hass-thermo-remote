@@ -20,7 +20,10 @@ class Display:
         self.driver.init_display()
         if view is BootView:
             from sys_status import instance as sys_status
-            self.driver.text('Starting...', 0, 0)
+            if sys_status.boot:
+                self.driver.text('Starting...', 0, 0)
+            else
+                self.driver.text('Running', 0, 0)
             self.driver.text('Sensor is{} OK'.format('' if sys_status.sensor else ' not'), 0, 10)
             self.driver.text('HASS connection is{} OK'.format('' if sys_status.hass_api else ' not'), 0, 20)
             self.driver.text('MQTT connection is{} OK'.format('' if sys_status.mqtt else ' not'), 0, 30)
