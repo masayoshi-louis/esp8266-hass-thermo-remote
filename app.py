@@ -76,8 +76,8 @@ def main():
                  callback=sensor_update)
 
     controller = Controller(hass_thermo_api=hass_thermo,
-                            local_changes=LocalChanges(max_temp=float(cur_state.attributes.max_temp),
-                                                       min_temp=float(cur_state.attributes.min_temp)))
+                            local_changes=LocalChanges(max_temp=float(cur_state['attributes']['max_temp']),
+                                                       min_temp=float(cur_state['attributes']['min_temp'])))
 
     if LIGHT_SLEEP_ENABLED:
         esp.sleep_type(esp.SLEEP_LIGHT)
