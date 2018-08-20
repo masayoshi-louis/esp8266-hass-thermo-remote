@@ -19,8 +19,7 @@ cp -t ../micropython/ports/esp8266/modules \
   ssd1306.py \
   writer.py \
   wifi.py \
-  wifi_init.py \
-  display.py
+  wifi_init.py
 
 cp -r font ../micropython/ports/esp8266/modules
 
