@@ -284,6 +284,6 @@ class BME280:
 
     def sample(self):
         t = float(self.temperature[:-1])
-        h = float(self.humidity[:-3])
-        p = float(self.pressure[:-1])
+        h = float(self.humidity[:-1])
+        p = float(self.pressure[:-3])
         return SensorSample(t, h, p)
