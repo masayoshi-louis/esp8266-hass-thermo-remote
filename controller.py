@@ -79,6 +79,6 @@ class Controller:
 
     def _setpoint_down_btn_loop(self, btn: ContinuousButton):
         if btn.loop() == BUTTON_EVENT_PRESSED:
-            print("[BTN] down-up button pressed")
+            print("[BTN] temp-down button pressed")
             self.local_changes.setpoint_add(-0.5)
             self.refresh_display = True
