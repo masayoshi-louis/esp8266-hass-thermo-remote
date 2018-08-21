@@ -19,7 +19,7 @@ class Display:
 
     def render(self, view: View):
         print("[DISP] rendering", repr(view))
-        self.driver.init_display()
+        self.driver.fill(0)
         view.write_to(self.driver)
         self.driver.show()
 
