@@ -106,7 +106,8 @@ class LocalChanges:
         else:
             self.last_item = item
             self.last_ts = time.ticks_ms()
-            setattr(self, item, getattr(instance, item))
+            if getattr(self, item) is None:
+                setattr(self, item, getattr(instance, item))
             return False
 
     def flip_op_mode(self):
