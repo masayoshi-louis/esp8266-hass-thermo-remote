@@ -93,7 +93,23 @@ class LocalChanges:
         self.max_t = max_temp
         self.min_t = min_temp
 
+    def enter_op_mode_setting(self) -> bool:
+        if self.last_item == ATTR_OP_MODE:
+            return True
+        else:
+            self.last_item = ATTR_OP_MODE
+            return False
+
+    def enter_temperature_setting(self) -> bool:
+        if self.last_item == ATTR_SETPOINT:
+            return True
+        else:
+            self.last_item = ATTR_SETPOINT
+            return False
+
     def flip_op_mode(self):
+        if self.last_item != ATTR_OP_MODE:
+            raise Exception
         if self.op_mode is None:
             current = getattr(instance, ATTR_OP_MODE)
         else:
@@ -104,16 +120,16 @@ class LocalChanges:
         else:
             self.op_mode = OP_MODE_OFF
         self.last_ts = time.ticks_ms()
-        self.last_item = ATTR_SETPOINT
 
     def setpoint_add(self, delta: float):
+        if self.last_item != ATTR_SETPOINT:
+            raise Exception
         if self.setpoint is None:
             current = getattr(instance, ATTR_SETPOINT)
         else:
             current = self.setpoint
         self.setpoint = min(max(current + delta, self.min_t), self.max_t)
         self.last_ts = time.ticks_ms()
-        self.last_item = ATTR_SETPOINT
 
     def save_to(self, api: ThermostatAPI):
         if self.op_mode is not None:
