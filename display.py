@@ -91,4 +91,4 @@ class NormalView(View):
         driver.text(pressure_str, driver.width - len(pressure_str) * 8, 0)
         driver.text("room", 64 - 16, 56)
         if model.operation_mode == OP_MODE_OFF:
-            driver.text("OFF", 128 - 24, 20)
+            driver.text("OFF", driver.width - 24, 20)
