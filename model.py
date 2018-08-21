@@ -78,8 +78,8 @@ def init(init_data: dict):
 
 class LocalChanges:
     __slots__ = [
-        'setpoint',
-        'op_mode',
+        'temperature',
+        'operation_mode',
         'last_ts',
         'last_item',
         'max_t',
@@ -87,8 +87,8 @@ class LocalChanges:
     ]
 
     def __init__(self, max_temp: float, min_temp: float):
-        self.setpoint = None
-        self.op_mode = None
+        self.temperature = None
+        self.operation_mode = None
         self.last_ts = None
         self.last_item = None
         self.max_t = max_temp
@@ -106,44 +106,37 @@ class LocalChanges:
         else:
             self.last_item = item
             self.last_ts = time.ticks_ms()
+            setattr(self, item, getattr(instance, item))
             return False
 
     def flip_op_mode(self):
         if self.last_item != ATTR_OP_MODE:
             raise Exception
-        if self.op_mode is None:
-            current = getattr(instance, ATTR_OP_MODE)
-        else:
-            current = self.op_mode
         # flip mode
-        if current == OP_MODE_OFF:
-            self.op_mode = OP_MODE_HEAT
+        if self.operation_mode == OP_MODE_OFF:
+            self.operation_mode = OP_MODE_HEAT
         else:
-            self.op_mode = OP_MODE_OFF
+            self.operation_mode = OP_MODE_OFF
         self.last_ts = time.ticks_ms()
 
     def setpoint_add(self, delta: float):
         if self.last_item != ATTR_SETPOINT:
             raise Exception
-        if self.setpoint is None:
-            current = getattr(instance, ATTR_SETPOINT)
-        else:
-            current = self.setpoint
-        self.setpoint = min(max(current + delta, self.min_t), self.max_t)
+        self.temperature = min(max(self.setpoint + delta, self.min_t), self.max_t)
         self.last_ts = time.ticks_ms()
 
     def save_to(self, api: ThermostatAPI):
-        if self.op_mode is not None:
-            if self.op_mode == OP_MODE_OFF:
+        if self.operation_mode is not None:
+            if self.operation_mode == OP_MODE_OFF:
                 api.turn_off()
             else:
                 api.set_heat_mode()
-        if self.setpoint is not None:
-            api.set_temperature(self.setpoint)
+        if self.temperature is not None:
+            api.set_temperature(self.temperature)
 
     def reset(self):
-        self.setpoint = None
-        self.op_mode = None
+        self.temperature = None
+        self.operation_mode = None
         self.last_ts = None
         self.last_item = None
 

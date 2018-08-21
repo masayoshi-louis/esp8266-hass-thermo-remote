@@ -102,5 +102,16 @@ class SettingView(View):
         self.lc = local_changes
 
     def write_to(self, driver: SSD1306_I2C):
-        driver.text("not", 0, 0)
-        driver.text("implemented", 0, 10)
+        from model import ATTR_OP_MODE
+
+        driver.text("set", driver.height - 12, 56)
+
+        wri = Writer(driver, freesans40, verbose=False)
+        if self.lc.last_item == ATTR_OP_MODE:
+            text = self.lc.operation_mode.upper()
+            text_w = wri.stringlen(text)
+            Writer.set_textpos(driver, 16, int((driver.width - text_w) / 2))
+            wri.printstring(text_w)
+        else:
+            Writer.set_textpos(driver, 16, 26)
+            wri.printstring("{0:.1f}".format(self.lc.temperature))
