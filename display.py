@@ -111,7 +111,7 @@ class SettingView(View):
             text = self.lc.operation_mode.upper()
             text_w = wri.stringlen(text)
             Writer.set_textpos(driver, 16, int((driver.width - text_w) / 2))
-            wri.printstring(text_w)
+            wri.printstring(text)
         else:
             Writer.set_textpos(driver, 16, 26)
             wri.printstring("{0:.1f}".format(self.lc.temperature))
