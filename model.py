@@ -59,6 +59,7 @@ class ThermostatModel:
 
     def update_sensor_sample(self, value: SensorSample):
         self.sensor_sample = value
+        self.current_temperature = self.sensor_sample.t
         self.notify_listeners()
 
     def add_listener(self, l):

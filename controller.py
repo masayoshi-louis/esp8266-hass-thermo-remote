@@ -1,5 +1,6 @@
 from micropython import const
 
+import display
 from button import ContinuousButton, GenericButton, BUTTON_EVENT_CLICK, BUTTON_EVENT_PRESSED
 from config import *
 from debounce_event import BUTTON_DEFAULT_HIGH, BUTTON_PUSHBUTTON, BUTTON_SET_PULLUP
@@ -59,8 +60,11 @@ class Controller:
                 sys_status.set_hass_api(False)
 
     def _render(self):
-        # TODO
-        pass
+        if self.local_changes.is_changed:
+            # TODO
+            pass
+        else:
+            display.instance.render(display.NormalView())
 
     def _on_model_updated(self):
         self.refresh_display = True

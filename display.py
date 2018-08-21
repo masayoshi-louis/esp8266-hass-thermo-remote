@@ -2,6 +2,9 @@ from machine import I2C
 
 from config import DISP_I2C_ADDR
 from ssd1306 import SSD1306_I2C
+from writer import Writer
+
+from font import freesans23, freesans40
 
 instance = None
 
@@ -57,3 +60,35 @@ class SysStatusView(View):
 
 
 sys_status_view = SysStatusView()
+
+
+class NormalView(View):
+    __slots__ = []
+
+    def write_to(self, driver: SSD1306_I2C):
+        from model import instance as model
+        from model import OP_MODE_OFF, STATE_HEAT
+
+        is_heating = (model.state == STATE_HEAT)
+
+        wri_t = Writer(driver, freesans40)
+        wri_t.set_clip(False, False, False)  # Char wrap
+        Writer.set_textpos(driver, 16, 26)
+        if is_heating:
+            driver.fill_rect(0, 14, 128, wri_t.height(), 1)
+        wri_t.printstring(str(int(model.current_temperature)) + ".", invert=is_heating)
+
+        wri_t_s = Writer(driver, freesans23)
+        wri_t_s.set_clip(False, False, False)  # Char wrap
+        Writer.set_textpos(driver, 29, 82)
+        wri_t_s.printstring(str(model.current_temperature)[-1:], invert=is_heating)
+
+        if is_heating:
+            driver.fill_rect(0, 52, 128, 4, 0)
+
+        driver.text("{0:.1f}%RH".format(model.sensor_sample.h), 0, 0)
+        pressure_str = "{0:.1f}kPa".format(model.sensor_sample.p)
+        driver.text(pressure_str, driver.width - len(pressure_str) * 8, 0)
+        driver.text("room", 64 - 16, 56)
+        if model.operation_mode == OP_MODE_OFF:
+            driver.text("OFF", 128 - 24, 20)
