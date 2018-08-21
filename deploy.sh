@@ -22,7 +22,6 @@ fi
 
 sudo ampy -p $TTY_PORT put main.py
 sudo ampy -p $TTY_PORT put app.py
-sudo ampy -p $TTY_PORT put controller.py
 sudo ampy -p $TTY_PORT put display.py
 
 echo 'done!'

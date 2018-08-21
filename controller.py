@@ -61,8 +61,7 @@ class Controller:
 
     def _render(self):
         if self.local_changes.is_changed:
-            # TODO
-            pass
+            display.instance.render(display.SettingView(self.local_changes))
         else:
             display.instance.render(display.NormalView())
 

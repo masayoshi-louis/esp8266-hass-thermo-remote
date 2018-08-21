@@ -5,6 +5,7 @@ from ssd1306 import SSD1306_I2C
 from writer import Writer
 
 from font import freesans23, freesans40
+from model import LocalChanges
 
 instance = None
 
@@ -92,3 +93,14 @@ class NormalView(View):
         driver.text("room", driver.height - 16, 56)
         if model.operation_mode == OP_MODE_OFF:
             driver.text("OFF", driver.width - 24, 20)
+
+
+class SettingView(View):
+    __slots__ = ['lc']
+
+    def __init__(self, local_changes: LocalChanges):
+        self.lc = local_changes
+
+    def write_to(self, driver: SSD1306_I2C):
+        driver.text("not", 0, 0)
+        driver.text("implemented", 0, 10)
