@@ -75,7 +75,7 @@ class NormalView(View):
         wri_t.set_clip(False, False, False)  # Char wrap
         Writer.set_textpos(driver, 16, 26)
         if is_heating:
-            driver.fill_rect(0, 14, 128, wri_t.height(), 1)
+            driver.fill_rect(0, 14, driver.width, wri_t.height(), 1)
         wri_t.printstring(str(int(model.current_temperature)) + ".", invert=is_heating)
 
         wri_t_s = Writer(driver, freesans23)
@@ -84,11 +84,11 @@ class NormalView(View):
         wri_t_s.printstring(str(model.current_temperature)[-1:], invert=is_heating)
 
         if is_heating:
-            driver.fill_rect(0, 52, 128, 4, 0)
+            driver.fill_rect(0, 52, driver.width, 4, 0)
 
         driver.text("{0:.1f}%RH".format(model.sensor_sample.h), 0, 0)
         pressure_str = "{0:.1f}kPa".format(model.sensor_sample.p)
         driver.text(pressure_str, driver.width - len(pressure_str) * 8, 0)
-        driver.text("room", 64 - 16, 56)
+        driver.text("room", driver.height - 16, 56)
         if model.operation_mode == OP_MODE_OFF:
             driver.text("OFF", driver.width - 24, 20)
