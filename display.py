@@ -87,7 +87,7 @@ class NormalView(View):
             driver.fill_rect(0, 52, driver.width, 4, 0)
 
         driver.text("{0:.1f}%RH".format(model.sensor_sample.h), 0, 0)
-        pressure_str = "{0:.1f}kPa".format(model.sensor_sample.p * 10)
+        pressure_str = "{0:.1f}kPa".format(model.sensor_sample.p / 10)
         driver.text(pressure_str, driver.width - len(pressure_str) * 8, 0)
         driver.text("room", driver.height - 16, 56)
         if model.operation_mode == OP_MODE_OFF:
