@@ -34,20 +34,22 @@
 
 import framebuf
 
+
 class DisplayState():
     def __init__(self):
         self.text_row = 0
         self.text_col = 0
         self.usd = False
 
+
 def _get_id(device):
     if not isinstance(device, framebuf.FrameBuffer):
         raise ValueError('Device must be derived from FrameBuffer.')
     return id(device)
 
+
 # Basic Writer class for monochrome displays
 class Writer():
-
     state = {}  # Holds a display state for each device
 
     @staticmethod
@@ -63,8 +65,8 @@ class Writer():
         if col is not None:
             if col < 0 or col >= device.width:
                 raise ValueError('col is out of range')
-            s.text_col = device.width -1 - col if s.usd else col
-        return s.text_row,  s.text_col
+            s.text_col = device.width - 1 - col if s.usd else col
+        return s.text_row, s.text_col
 
     def __init__(self, device, font, verbose=True):
         self.devid = _get_id(device)
@@ -157,7 +159,7 @@ class Writer():
             if pos > 0:
                 rstr = string[pos + 1:]
                 string = lstr
-                
+
         for char in string:
             self._printchar(char, invert)
         if rstr is not None:
@@ -220,7 +222,7 @@ class Writer():
         self.glyph = glyph
         self.char_height = char_height
         self.char_width = char_width
-        
+
     # Method using blitting. Efficient rendering for monochrome displays.
     # Tested on SSD1306. Invert is for black-on-white rendering.
     def _printchar(self, char, invert=False, recurse=False):
@@ -253,7 +255,7 @@ class CWriter(Writer):
             Writer.state[devid] = DisplayState()
         Writer.state[devid].usd = value
 
-    def __init__(self,device, font, verbose=True):
+    def __init__(self, device, font, verbose=True):
         super().__init__(device, font, verbose)
 
     def setcolor(self, fgcolor=None, bgcolor=None):
@@ -297,6 +299,7 @@ class CWriter(Writer):
         s.text_col += -char_width if usd else char_width
         self.cpos += 1
 
+
 class Label():
     def __init__(self, writer, row, col, text, invert=False):
         self.writer = writer
@@ -317,6 +320,7 @@ class Label():
         dev = wri.device
         Writer.set_textpos(dev, self.row, self.col)
         wri.printstring(self.text, self.invert)
+
 
 class Field(Label):
     def __init__(self, writer, row, col, max_text, border=False):

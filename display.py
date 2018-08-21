@@ -2,6 +2,8 @@ from machine import I2C
 
 from config import DISP_I2C_ADDR
 from ssd1306 import SSD1306_I2C
+from font import ms_yahei23
+from writer import Writer
 
 instance = None
 
@@ -36,7 +38,9 @@ class SysStatusView(View):
     def write_to(self, driver: SSD1306_I2C):
         from sys_status import instance as sys_status
         if sys_status.boot:
-            driver.text('Starting...', 0, 0)
+            wri = Writer(driver, ms_yahei23)
+            wri.set_clip(False, False, False)  # Char wrap
+            wri.printstring('启动中...', invert=True)
             if sys_status.sensor:
                 driver.text('Sensor OK', 0, 10)
             else:
