@@ -36,10 +36,10 @@ class Controller:
                                   repeat=300)
         self.btn3 = ContinuousButton(pin=PIN_BTN_3,
                                      mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
-                                     interval=250)
+                                     interval=200)
         self.btn4 = ContinuousButton(pin=PIN_BTN_4,
                                      mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
-                                     interval=250)
+                                     interval=200)
 
     def loop(self):
         # button actions
