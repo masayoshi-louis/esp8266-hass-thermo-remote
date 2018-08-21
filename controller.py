@@ -74,19 +74,19 @@ class Controller:
         if btn.loop() == BUTTON_EVENT_CLICK:
             if self.local_changes.enter_op_mode_setting():
                 self.local_changes.flip_op_mode()
-            print("[BTN] mode button click, set mode to", self.local_changes.op_mode)
+            print("[BTN] mode button click, set mode to", self.local_changes.operation_mode)
             self.refresh_display = True
 
     def _setpoint_up_btn_loop(self, btn: ContinuousButton):
         if btn.loop() == BUTTON_EVENT_PRESSED:
             if self.local_changes.enter_temperature_setting():
                 self.local_changes.setpoint_add(0.5)
-            print("[BTN] temp-up button pressed, set temperature to", self.local_changes.setpoint)
+            print("[BTN] temp-up button pressed, set temperature to", self.local_changes.temperature)
             self.refresh_display = True
 
     def _setpoint_down_btn_loop(self, btn: ContinuousButton):
         if btn.loop() == BUTTON_EVENT_PRESSED:
             if self.local_changes.enter_temperature_setting():
                 self.local_changes.setpoint_add(-0.5)
-            print("[BTN] temp-down button pressed, set temperature to", self.local_changes.setpoint)
+            print("[BTN] temp-down button pressed, set temperature to", self.local_changes.temperature)
             self.refresh_display = True
