@@ -95,17 +95,17 @@ class LocalChanges:
         self.min_t = min_temp
 
     def enter_op_mode_setting(self) -> bool:
-        if self.last_item == ATTR_OP_MODE:
-            return True
-        else:
-            self.last_item = ATTR_OP_MODE
-            return False
+        return self._enter_setting(ATTR_OP_MODE)
 
     def enter_temperature_setting(self) -> bool:
-        if self.last_item == ATTR_SETPOINT:
+        return self._enter_setting(ATTR_SETPOINT)
+
+    def _enter_setting(self, item: str) -> bool:
+        if self.last_item == item:
             return True
         else:
-            self.last_item = ATTR_SETPOINT
+            self.last_item = item
+            self.last_ts = time.ticks_ms()
             return False
 
     def flip_op_mode(self):
@@ -140,8 +140,6 @@ class LocalChanges:
                 api.set_heat_mode()
         if self.setpoint is not None:
             api.set_temperature(self.setpoint)
-        # clear local changes
-        self.reset()
 
     def reset(self):
         self.setpoint = None

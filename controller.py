@@ -55,6 +55,8 @@ class Controller:
         if self.local_changes.is_changed and self.local_changes.is_stable(ACTION_DELAY):
             try:
                 self.local_changes.save_to(self.hass_thermo_api)
+                # clear local changes
+                self.local_changes.reset()
                 self.refresh_display = True
             except OSError:
                 sys_status.set_hass_api(False)
