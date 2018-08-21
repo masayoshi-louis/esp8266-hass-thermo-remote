@@ -122,7 +122,7 @@ class LocalChanges:
     def setpoint_add(self, delta: float):
         if self.last_item != ATTR_SETPOINT:
             raise Exception
-        self.temperature = min(max(self.setpoint + delta, self.min_t), self.max_t)
+        self.temperature = min(max(self.temperature + delta, self.min_t), self.max_t)
         self.last_ts = time.ticks_ms()
 
     def save_to(self, api: ThermostatAPI):
