@@ -41,18 +41,18 @@ class SysStatusView(View):
             else:
                 driver.text('Sensor checking', 0, 10)
             if sys_status.hass_api:
-                driver.text('HASS OK', 0, 20)
+                driver.text('HASS   OK', 0, 20)
             else:
                 driver.text('HASS connecting', 0, 20)
             if sys_status.mqtt:
-                driver.text('MQTT OK', 0, 30)
+                driver.text('MQTT   OK', 0, 30)
             else:
                 driver.text('MQTT connecting', 0, 30)
         else:
             driver.text('Running', 0, 0)
             driver.text('Sensor {}'.format('OK' if sys_status.sensor else 'fail'), 0, 10)
-            driver.text('HASS {}'.format('OK' if sys_status.hass_api else 'conn lost'), 0, 20)
-            driver.text('MQTT {}'.format('OK' if sys_status.mqtt else 'conn lost'), 0, 30)
+            driver.text('HASS   {}'.format('OK' if sys_status.hass_api else 'conn lost'), 0, 20)
+            driver.text('MQTT   {}'.format('OK' if sys_status.mqtt else 'conn lost'), 0, 30)
 
 
 sys_status_view = SysStatusView()
