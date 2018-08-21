@@ -1,4 +1,3 @@
-import utime as time
 from micropython import const
 
 import display
@@ -59,7 +58,6 @@ class Controller:
                 # clear local changes
                 self.local_changes.reset()
                 self.refresh_display = True
-                time.sleep(1)
             except OSError:
                 sys_status.set_hass_api(False)
 
