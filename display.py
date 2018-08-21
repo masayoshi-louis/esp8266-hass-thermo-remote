@@ -72,14 +72,14 @@ class NormalView(View):
 
         is_heating = (model.state == STATE_HEAT)
 
-        wri_t = Writer(driver, freesans40)
+        wri_t = Writer(driver, freesans40, verbose=False)
         wri_t.set_clip(False, False, False)  # Char wrap
         Writer.set_textpos(driver, 16, 26)
         if is_heating:
             driver.fill_rect(0, 14, driver.width, wri_t.height(), 1)
         wri_t.printstring(str(int(model.current_temperature)) + ".", invert=is_heating)
 
-        wri_t_s = Writer(driver, freesans23)
+        wri_t_s = Writer(driver, freesans23, verbose=False)
         wri_t_s.set_clip(False, False, False)  # Char wrap
         Writer.set_textpos(driver, 29, 82)
         wri_t_s.printstring(str(model.current_temperature)[-1:], invert=is_heating)
