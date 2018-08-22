@@ -85,7 +85,7 @@ class NormalView(View):
         wri_t_s.printstring(str(self.data.current_temperature)[-1:], invert=is_heating)
 
         if is_heating:
-            Writer.set_textpos(driver, 16, driver.width - wri_t_s.stringlen("H") + 2)
+            Writer.set_textpos(driver, 16, driver.width - wri_t_s.stringlen("H"))
             wri_t_s.printstring("H", invert=True)
             driver.fill_rect(0, 52, driver.width, 4, 0)
 
