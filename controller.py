@@ -1,7 +1,6 @@
 from micropython import const
 
 import display
-import model
 from button import ContinuousButton, GenericButton, BUTTON_EVENT_CLICK, BUTTON_EVENT_PRESSED
 from config import *
 from debounce_event import BUTTON_DEFAULT_HIGH, BUTTON_PUSHBUTTON, BUTTON_SET_PULLUP
@@ -27,8 +26,8 @@ class Controller:
     def __init__(self,
                  hass_thermo_api: ThermostatAPI,
                  local_changes: LocalChanges,
-                 model: ThermostatModel = model.instance):
-        self.model = model
+                 thermostat_model: ThermostatModel):
+        self.model = thermostat_model
         self.hass_thermo_api = hass_thermo_api
         self.refresh_display = False
         self.model.add_listener(self._on_model_updated)

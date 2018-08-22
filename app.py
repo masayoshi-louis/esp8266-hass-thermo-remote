@@ -85,6 +85,7 @@ def main():
                  callback=sensor_update)
 
     controller = Controller(hass_thermo_api=hass_thermo,
+                            thermostat_model=model.instance,
                             local_changes=LocalChanges(max_temp=float(cur_state['attributes']['max_temp']),
                                                        min_temp=float(cur_state['attributes']['min_temp'])))
 
