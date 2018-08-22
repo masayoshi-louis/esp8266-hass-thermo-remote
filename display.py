@@ -86,10 +86,10 @@ class NormalView(View):
 
         if is_heating:
             driver.fill_rect(0, 52, driver.width, 4, 0)
-            driver.text("H", driver.width - 8, 17)
-            driver.text("E", driver.width - 8, 17 + 9)
-            driver.text("A", driver.width - 8, 17 + 9 * 2)
-            driver.text("T", driver.width - 8, 17 + 9 * 3)
+            driver.text("H", driver.width - 8, 16)
+            driver.text("E", driver.width - 8, 16 + 9)
+            driver.text("A", driver.width - 8, 16 + 9 * 2)
+            driver.text("T", driver.width - 8, 16 + 9 * 3)
 
         driver.text("{0:.1f}%RH".format(self.data.sensor_sample.h), 0, 0)
         pressure_str = "{0:.1f}kPa".format(self.data.sensor_sample.p / 10)
