@@ -1,11 +1,10 @@
 from machine import I2C
 
 from config import DISP_I2C_ADDR
-from ssd1306 import SSD1306_I2C
-from writer import Writer
-
 from font import freesans23, freesans40
 from model import LocalChanges
+from ssd1306 import SSD1306_I2C
+from writer import Writer
 
 instance = None
 
@@ -63,34 +62,36 @@ sys_status_view = SysStatusView()
 
 
 class NormalView(View):
-    __slots__ = []
+    __slots__ = ['data']
+
+    def __init__(self, data):
+        self.data = data
 
     def write_to(self, driver: SSD1306_I2C):
-        from model import instance as model
         from model import OP_MODE_OFF, STATE_HEAT
 
-        is_heating = (model.state == STATE_HEAT)
+        is_heating = (self.data.state == STATE_HEAT)
 
         wri_t = Writer(driver, freesans40, verbose=False)
         wri_t.set_clip(False, False, False)  # Char wrap
         Writer.set_textpos(driver, 16, 26)
         if is_heating:
             driver.fill_rect(0, 14, driver.width, wri_t.height(), 1)
-        wri_t.printstring(str(int(model.current_temperature)) + ".", invert=is_heating)
+        wri_t.printstring(str(int(self.data.current_temperature)) + ".", invert=is_heating)
 
         wri_t_s = Writer(driver, freesans23, verbose=False)
         wri_t_s.set_clip(False, False, False)  # Char wrap
         Writer.set_textpos(driver, 29, 82)
-        wri_t_s.printstring(str(model.current_temperature)[-1:], invert=is_heating)
+        wri_t_s.printstring(str(self.data.current_temperature)[-1:], invert=is_heating)
 
         if is_heating:
             driver.fill_rect(0, 52, driver.width, 4, 0)
 
-        driver.text("{0:.1f}%RH".format(model.sensor_sample.h), 0, 0)
-        pressure_str = "{0:.1f}kPa".format(model.sensor_sample.p / 10)
+        driver.text("{0:.1f}%RH".format(self.data.sensor_sample.h), 0, 0)
+        pressure_str = "{0:.1f}kPa".format(self.data.sensor_sample.p / 10)
         driver.text(pressure_str, driver.width - len(pressure_str) * 8, 0)
         driver.text("room", driver.height - 16, 56)
-        if model.operation_mode == OP_MODE_OFF:
+        if self.data.operation_mode == OP_MODE_OFF:
             driver.text("OFF", driver.width - 24, 20)
 
 

@@ -1,11 +1,12 @@
 from micropython import const
 
 import display
+import model
 from button import ContinuousButton, GenericButton, BUTTON_EVENT_CLICK, BUTTON_EVENT_PRESSED
 from config import *
 from debounce_event import BUTTON_DEFAULT_HIGH, BUTTON_PUSHBUTTON, BUTTON_SET_PULLUP
 from hass import ThermostatAPI
-from model import LocalChanges
+from model import LocalChanges, ThermostatModel
 from sys_status import instance as sys_status
 
 ACTION_DELAY = const(2000)
@@ -13,6 +14,7 @@ ACTION_DELAY = const(2000)
 
 class Controller:
     __slots__ = [
+        'model',
         'hass_thermo_api',
         'refresh_display',
         'btn1',
@@ -22,11 +24,14 @@ class Controller:
         'local_changes'
     ]
 
-    def __init__(self, hass_thermo_api: ThermostatAPI, local_changes: LocalChanges):
-        from model import instance as model
+    def __init__(self,
+                 hass_thermo_api: ThermostatAPI,
+                 local_changes: LocalChanges,
+                 model: ThermostatModel = model.instance):
+        self.model = model
         self.hass_thermo_api = hass_thermo_api
         self.refresh_display = False
-        model.add_listener(self._on_model_updated)
+        self.model.add_listener(self._on_model_updated)
         self.local_changes = local_changes
         self.btn1 = GenericButton(pin=PIN_BTN_1,
                                   mode=BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH | BUTTON_SET_PULLUP,
@@ -65,7 +70,7 @@ class Controller:
         if self.local_changes.is_changed:
             display.instance.render(display.SettingView(self.local_changes))
         else:
-            display.instance.render(display.NormalView())
+            display.instance.render(display.NormalView(self.model))
 
     def _on_model_updated(self):
         self.refresh_display = True
