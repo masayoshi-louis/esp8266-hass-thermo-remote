@@ -108,7 +108,13 @@ class SettingView(View):
     def write_to(self, driver: SSD1306_I2C):
         from model import ATTR_OP_MODE
 
-        driver.text("set", driver.height - 12, 56)
+        driver.text("set", int(driver.width / 2) - 12, 56)
+        driver.fill_rect(0, 0, driver.width, 2, 1)  # top
+        driver.fill_rect(0, 0, 2, driver.height, 1)  # left
+        driver.fill_rect(driver.width - 2, 0, 2, driver.height, 1)  # right
+        driver.fill_rect(0, driver.height - 2, int(driver.width / 2) - 12 - 4, 2, 1)  # bottom-left
+        driver.fill_rect(int(driver.width / 2) + 12 + 4,
+                         driver.height - 2, int(driver.width / 2) - 12 - 4, 2, 1)  # bottom-right
 
         wri = Writer(driver, freesans40, verbose=False)
         if self.lc.last_item == ATTR_OP_MODE:
