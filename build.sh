@@ -20,7 +20,8 @@ cp -t ../micropython/ports/esp8266/modules \
   writer.py \
   wifi.py \
   wifi_init.py \
-  controller.py
+  controller.py \
+  gfx.py
 
 cp -r font ../micropython/ports/esp8266/modules
 
