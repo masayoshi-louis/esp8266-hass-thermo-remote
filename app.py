@@ -94,8 +94,8 @@ def main():
                  callback=sensor_update)
 
     v_tim = Timer(V_TIM_ID)
-    dht_tim.init(period=30 * 1000, mode=Timer.PERIODIC,
-                 callback=sensor_update)
+    v_tim.init(period=30 * 1000, mode=Timer.PERIODIC,
+               callback=voltage_updater(v_sensor_mqtt))
 
     controller = Controller(hass_thermo_api=hass_thermo,
                             thermostat_model=model.instance,
