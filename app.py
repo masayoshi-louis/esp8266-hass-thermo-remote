@@ -43,7 +43,7 @@ def main():
 
     while 1:
         try:
-            dht_sensor = DHTSensor(pin=PIN_DHT, i2c=i2c)
+            dht_sensor = MultiSensor(pin=PIN_DHT, i2c=i2c)
             dht_sensor.sample()  # test sensor
             sys_status.set_sensor(True)
             display.render(sys_status_view)
@@ -98,7 +98,7 @@ def main():
         controller.loop()
 
 
-class DHTSensor:
+class MultiSensor:
     __slots__ = ['dht', 'bme', 'sht', 'prev_sample']
 
     def __init__(self, pin: int, i2c: I2C):
@@ -120,8 +120,8 @@ class DHTSensor:
 
         try:
             _sht_result = self.sht.get_temp_humi()
-            sht_result = SensorSample(_sht_result[0], _sht_result[1], -1000)
-            print("[DHT] SHT31:  T = {} {}, H = {} % RH".format(_sht_result[0], TEMPERATURE_UNIT, _sht_result[1]))
+            sht_result = SensorSample(round(_sht_result[0], 1), round(_sht_result[1], 1), -1000)
+            print("[SENSOR] SHT31:  T = {} {}, H = {} % RH".format(_sht_result[0], TEMPERATURE_UNIT, _sht_result[1]))
         except OSError as e:
             print("[SENSOR] SHT31 is not available")
             sht_result = None
@@ -130,9 +130,12 @@ class DHTSensor:
 
         try:
             bme_result = self.bme.sample()
+            bme_result.t = round(bme_result.t, 1)
+            bme_result.h = round(bme_result.h, 1)
             print(
-                "[DHT] BME280: T = {} {}, H = {} % RH, P = {} hPa".format(bme_result.t, TEMPERATURE_UNIT, bme_result.h,
-                                                                          bme_result.p))
+                "[SENSOR] BME280: T = {} {}, H = {} % RH, P = {} hPa".format(bme_result.t, TEMPERATURE_UNIT,
+                                                                             bme_result.h,
+                                                                             bme_result.p))
         except OSError as e:
             print("[SENSOR] BME280 is not available")
             bme_result = None
@@ -160,16 +163,16 @@ class DHT2Model:
 
 def dht_updater(*conns):
     def f(_timer):
-        schedule(dht_push_sample, conns)
+        schedule(sensor_push_sample, conns)
 
     return f
 
 
-def dht_push_sample(conns):
+def sensor_push_sample(conns):
     try:
         result = dht_sensor.sample()
     except OSError as e:
-        print("[DHT]", repr(e))
+        print("[SENSOR]", repr(e))
         sys_status.set_sensor(False)
         result = None  # actually impossible
     if result is not None:
