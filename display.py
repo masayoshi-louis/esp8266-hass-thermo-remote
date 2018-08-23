@@ -11,6 +11,8 @@ instance = None
 
 ROW_OFFSET = const(0)
 
+ROTATE = True
+
 
 class View:
     def write_to(self, driver: SH1106_I2C):
@@ -22,6 +24,8 @@ class Display:
 
     def __init__(self, i2c: I2C):
         self.driver = SH1106_I2C(i2c=i2c, addr=DISP_I2C_ADDR, width=128, height=64)
+        if ROTATE:
+            self.driver.rotate(True, update=True)
 
     def render(self, view: View):
         self.driver.fill(0)
