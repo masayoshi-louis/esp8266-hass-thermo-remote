@@ -99,26 +99,54 @@ def main():
 
 
 class DHTSensor:
-    __slots__ = ['driver', 'prev_sample', 'bme', 'sht']
+    __slots__ = ['dht', 'bme', 'sht', 'prev_sample']
 
     def __init__(self, pin: int, i2c: I2C):
-        self.driver = DHT22(Pin(pin))
+        self.dht = DHT22(Pin(pin))
         self.bme = BME280(i2c=i2c, address=BME280_I2C_ADDR)
-        self.sht = SHT31(i2c)
+        self.sht = SHT31(i2c, addr=SHT31_I2C_ADDR)
         self.prev_sample = SensorSample(-1000, -1000, -1000)
 
     def sample(self):
-        self.driver.measure()
-        result = SensorSample(self.driver.temperature(), self.driver.humidity(), -1000)
-        bme_result = self.bme.sample()
-        result.p = bme_result.p
-        self.prev_sample = result
-        print("[DHT] DHT22:  T = {} {}, H = {} % RH".format(result.t, TEMPERATURE_UNIT, result.h))
-        print("[DHT] BME280: T = {} {}, H = {} % RH, P = {} hPa".format(bme_result.t, TEMPERATURE_UNIT, bme_result.h,
-                                                                        bme_result.p))
+        try:
+            self.dht.measure()
+            dht_result = SensorSample(self.dht.temperature(), self.dht.humidity(), -1000)
+            print("[SENSOR] DHT22:  T = {} {}, H = {} % RH".format(dht_result.t, TEMPERATURE_UNIT, dht_result.h))
+        except OSError as e:
+            print("[SENSOR] DHT22 is not available")
+            dht_result = None
+            if SENSOR_MAIN == "dht":
+                raise e
 
-        sht_result = self.sht.get_temp_humi()
-        print("[DHT] SHT31:  T = {} {}, H = {} % RH".format(sht_result[0], TEMPERATURE_UNIT, sht_result[1]))
+        try:
+            _sht_result = self.sht.get_temp_humi()
+            sht_result = SensorSample(_sht_result[0], _sht_result[1], -1000)
+            print("[DHT] SHT31:  T = {} {}, H = {} % RH".format(_sht_result[0], TEMPERATURE_UNIT, _sht_result[1]))
+        except OSError as e:
+            print("[SENSOR] SHT31 is not available")
+            sht_result = None
+            if SENSOR_MAIN == "sht":
+                raise e
+
+        try:
+            bme_result = self.bme.sample()
+        except OSError as e:
+            print("[SENSOR] BME280 is not available")
+            bme_result = None
+            if SENSOR_MAIN == "bme":
+                raise e
+
+        if SENSOR_MAIN == "dht":
+            result = dht_result
+        if SENSOR_MAIN == "sht":
+            result = sht_result
+        if SENSOR_MAIN == "bme":
+            result = bme_result
+
+        if bme_result is not None:
+            result.p = bme_result.p
+
+        self.prev_sample = result
         return result
 
 
