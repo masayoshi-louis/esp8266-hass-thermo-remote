@@ -121,7 +121,7 @@ class MultiSensor:
         try:
             _sht_result = self.sht.get_temp_humi()
             sht_result = SensorSample(round(_sht_result[0], 1), round(_sht_result[1], 1), -1000)
-            print("[SENSOR] SHT31:  T = {} {}, H = {} % RH".format(_sht_result[0], TEMPERATURE_UNIT, _sht_result[1]))
+            print("[SENSOR] SHT31:  T = {} {}, H = {} % RH".format(sht_result.t, TEMPERATURE_UNIT, sht_result.h))
         except OSError as e:
             print("[SENSOR] SHT31 is not available")
             sht_result = None
