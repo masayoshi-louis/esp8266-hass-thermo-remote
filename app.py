@@ -130,6 +130,9 @@ class DHTSensor:
 
         try:
             bme_result = self.bme.sample()
+            print(
+                "[DHT] BME280: T = {} {}, H = {} % RH, P = {} hPa".format(bme_result.t, TEMPERATURE_UNIT, bme_result.h,
+                                                                          bme_result.p))
         except OSError as e:
             print("[SENSOR] BME280 is not available")
             bme_result = None
