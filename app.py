@@ -5,6 +5,7 @@ from dht import DHT22
 from machine import I2C
 from machine import Pin, Timer
 from micropython import const, schedule
+from sht31 import SHT31
 
 import hass
 import model
@@ -98,11 +99,12 @@ def main():
 
 
 class DHTSensor:
-    __slots__ = ['driver', 'prev_sample', 'bme']
+    __slots__ = ['driver', 'prev_sample', 'bme', 'sht']
 
     def __init__(self, pin: int, i2c: I2C):
         self.driver = DHT22(Pin(pin))
         self.bme = BME280(i2c=i2c, address=BME280_I2C_ADDR)
+        self.sht = SHT31(i2c)
         self.prev_sample = SensorSample(-1000, -1000, -1000)
 
     def sample(self):
@@ -114,6 +116,9 @@ class DHTSensor:
         print("[DHT] DHT22:  T = {} {}, H = {} % RH".format(result.t, TEMPERATURE_UNIT, result.h))
         print("[DHT] BME280: T = {} {}, H = {} % RH, P = {} hPa".format(bme_result.t, TEMPERATURE_UNIT, bme_result.h,
                                                                         bme_result.p))
+
+        sht_result = self.sht.get_temp_humi()
+        print("[DHT] SHT31:  T = {} {}, H = {} % RH".format(sht_result[0], TEMPERATURE_UNIT, sht_result[1]))
         return result
 
 

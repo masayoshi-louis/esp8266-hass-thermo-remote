@@ -13,6 +13,7 @@ cp -t ../micropython/ports/esp8266/modules \
   debounce_event.py \
   button.py \
   bme280.py \
+  sht31.py \
   hass.py \
   model.py \
   mqtt.py \
