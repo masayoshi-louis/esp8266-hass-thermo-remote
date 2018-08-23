@@ -5,7 +5,6 @@ from dht import DHT22
 from machine import I2C
 from machine import Pin, Timer
 from micropython import const, schedule
-from sht31 import SHT31
 
 import hass
 import model
@@ -13,10 +12,11 @@ import mqtt
 from bme280 import BME280
 from config import *
 from controller import Controller
-from display import sys_status_view
 from display import init as init_display
+from display import sys_status_view
 from hass import ThermostatAPI as HassThermostatAPI
 from model import SensorSample, LocalChanges
+from sht31 import SHT31
 from sys_status import instance as sys_status
 
 dht_sensor = None
@@ -24,10 +24,16 @@ dht_sensor = None
 DHT_TIM_ID = const(1)
 dht_tim = None
 
+# battery voltage
+V_TIM_ID = const(2)
+v_tim = None
+v_adc = machine.ADC(0)
+
 
 def main():
     global dht_sensor
     global dht_tim
+    global v_tim
 
     try:
         i2c = I2C(scl=Pin(PIN_I2C_SCL), sda=Pin(PIN_I2C_SDA))
@@ -79,11 +85,20 @@ def main():
     h_sensor_mqtt = mqtt.HassMQTTHumiditySensor(mapper=lambda x: x.h)
     h_sensor_mqtt.register({})
 
+    v_sensor_mqtt = mqtt.HassMQTTVoltageSensor()
+    v_sensor_mqtt.register({})
+
     dht_tim = Timer(DHT_TIM_ID)
     sensor_update = dht_updater(t_sensor_mqtt, h_sensor_mqtt, Sensor2Model())
     sensor_update(None)
     dht_tim.init(period=SENSOR_SAMPLE_INTERVAL * 1000, mode=Timer.PERIODIC,
                  callback=sensor_update)
+
+    v_tim = Timer(V_TIM_ID)
+    v_update = voltage_updater(v_sensor_mqtt)
+    v_update(None)
+    v_tim.init(period=30 * 1000, mode=Timer.PERIODIC,
+               callback=v_update)
 
     controller = Controller(hass_thermo_api=hass_thermo,
                             thermostat_model=model.instance,
@@ -182,3 +197,17 @@ def sensor_push_sample(conns):
 
 def mqtt_msg_dispatch(topic, msg):
     model.instance.update_by_mqtt(topic.decode(), msg.decode())
+
+
+def voltage_updater(sink):
+    def f(_timer):
+        schedule(push_voltage, sink)
+
+    return f
+
+
+def push_voltage(sink):
+    raw = v_adc.read()
+    v = raw / 1024 * 5
+    print("[BATTERY] voltage = {0:.2f}v".format(v))
+    sink.on_next(v)
