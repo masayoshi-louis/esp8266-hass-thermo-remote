@@ -18,6 +18,7 @@ cp -t ../micropython/ports/esp8266/modules \
   model.py \
   mqtt.py \
   ssd1306.py \
+  sh1106.py \
   writer.py \
   wifi.py \
   wifi_init.py \

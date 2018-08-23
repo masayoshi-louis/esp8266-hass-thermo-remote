@@ -80,7 +80,7 @@ def main():
     h_sensor_mqtt.register({})
 
     dht_tim = Timer(DHT_TIM_ID)
-    sensor_update = dht_updater(t_sensor_mqtt, h_sensor_mqtt, DHT2Model())
+    sensor_update = dht_updater(t_sensor_mqtt, h_sensor_mqtt, Sensor2Model())
     sensor_update(None)
     dht_tim.init(period=SENSOR_SAMPLE_INTERVAL * 1000, mode=Timer.PERIODIC,
                  callback=sensor_update)
@@ -156,7 +156,7 @@ class MultiSensor:
         return result
 
 
-class DHT2Model:
+class Sensor2Model:
     def on_next(self, x: SensorSample):
         model.instance.update_sensor_sample(x)
 
