@@ -1,5 +1,4 @@
 import json
-
 import machine
 import ubinascii
 import umqtt.simple
@@ -118,7 +117,7 @@ class HassMQTTDevice:
 class HassMQTTSensor(HassMQTTDevice):
     __slots__ = ['mapper']
 
-    def __init__(self, sub_id: str, mapper):
+    def __init__(self, sub_id: str, mapper=None):
         super().__init__('sensor', sub_id)
         self.mapper = mapper
 
@@ -126,7 +125,11 @@ class HassMQTTSensor(HassMQTTDevice):
         _client.publish(self.state_topic(), str(value).encode(), retain=True)
 
     def on_next(self, x):
-        self.report_state(self.mapper(x))
+        if self.mapper is None:
+            v = x
+        else:
+            v = self.mapper(x)
+        self.report_state(v)
 
     def register(self, config):
         self._register(config, enable_state=True, enable_command=False)
@@ -151,4 +154,14 @@ class HassMQTTHumiditySensor(HassMQTTSensor):
     def register(self, config):
         config['device_class'] = 'humidity'
         config['unit_of_measurement'] = '%'
+        super().register(config)
+
+
+class HassMQTTVoltageSensor(HassMQTTSensor):
+
+    def __init__(self, sub_id: str = 'voltage', **kw):
+        super().__init__(sub_id, **kw)
+
+    def register(self, config):
+        config['unit_of_measurement'] = 'v'
         super().register(config)
