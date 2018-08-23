@@ -9,7 +9,7 @@ from writer import Writer
 
 instance = None
 
-ROW_OFFSET = const(2)
+ROW_OFFSET = const(0)
 
 
 class View:
