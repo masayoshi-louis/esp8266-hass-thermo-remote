@@ -84,27 +84,14 @@ _HIGH_COLUMN_ADDRESS = const(0x10)
 _SET_PAGE_ADDRESS = const(0xB0)
 
 
-class SH1106:
+class SH1106(framebuf.FrameBuffer):
     def __init__(self, width, height, external_vcc):
         self.width = width
         self.height = height
         self.external_vcc = external_vcc
         self.pages = self.height // 8
         self.buffer = bytearray(self.pages * self.width)
-        fb = framebuf.FrameBuffer(self.buffer, self.width, self.height, framebuf.MVLSB)
-        self.framebuf = fb
-        # set shortcuts for the methods of framebuf
-        self.fill = fb.fill
-        self.fill_rect = fb.fill_rect
-        self.hline = fb.hline
-        self.vline = fb.vline
-        self.line = fb.line
-        self.rect = fb.rect
-        self.pixel = fb.pixel
-        self.scroll = fb.scroll
-        self.text = fb.text
-        self.blit = fb.blit
-
+        super().__init__(self.buffer, self.width, self.height, framebuf.MVLSB)
         self.init_display()
 
     def init_display(self):
