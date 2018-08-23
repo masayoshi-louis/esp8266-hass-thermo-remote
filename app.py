@@ -33,6 +33,7 @@ v_adc = machine.ADC(0)
 def main():
     global dht_sensor
     global dht_tim
+    global v_tim
 
     try:
         i2c = I2C(scl=Pin(PIN_I2C_SCL), sda=Pin(PIN_I2C_SDA))
@@ -94,7 +95,7 @@ def main():
                  callback=sensor_update)
 
     v_tim = Timer(V_TIM_ID)
-    v_tim.init(period=30 * 1000, mode=Timer.PERIODIC,
+    v_tim.init(period=5 * 1000, mode=Timer.PERIODIC,
                callback=voltage_updater(v_sensor_mqtt))
 
     controller = Controller(hass_thermo_api=hass_thermo,
