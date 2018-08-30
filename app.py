@@ -19,6 +19,8 @@ from model import SensorSample, LocalChanges
 from sht31 import SHT31
 from sys_status import instance as sys_status
 
+from tsl2561 import TSL2561
+
 dht_sensor = None
 
 DHT_TIM_ID = const(1)
@@ -28,6 +30,10 @@ dht_tim = None
 V_TIM_ID = const(2)
 v_tim = None
 v_adc = machine.ADC(0)
+
+last_light_sensor_sample_ts = 0
+
+LIGHT_SENSOR_SAMPLE_INTERVAL = const(1000)
 
 
 def main():
@@ -108,7 +114,12 @@ def main():
     if LIGHT_SLEEP_ENABLED:
         esp.sleep_type(esp.SLEEP_LIGHT)
 
+    lux_sensor = TSL2561(i2c=i2c)
+    lux_sensor.active(True)
+    time.sleep_ms(500)
+
     while 1:
+        adjust_display_brightness(lux_sensor)
         mqtt.loop()
         controller.loop()
 
@@ -211,3 +222,16 @@ def push_voltage(sink):
     v = raw / 1024 * 5
     print("[BATTERY] voltage = {0:.2f}v".format(v))
     sink.on_next(v)
+
+
+def adjust_display_brightness(sensor: TSL2561):
+    from display import instance as display
+    global last_light_sensor_sample_ts
+    now = time.ticks_ms()
+    if now - last_light_sensor_sample_ts > LIGHT_SENSOR_SAMPLE_INTERVAL:
+        lux = sensor.read()
+        if lux > 100:
+            display.set_brightness(255)
+        else:
+            display.set_brightness(lux)
+        last_light_sensor_sample_ts = now

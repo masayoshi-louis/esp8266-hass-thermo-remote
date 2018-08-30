@@ -32,6 +32,9 @@ class Display:
         view.write_to(self.driver)
         self.driver.show()
 
+    def set_brightness(self, level: int):
+        self.driver.contrast(level)
+
 
 def init(i2c: I2C):
     global instance

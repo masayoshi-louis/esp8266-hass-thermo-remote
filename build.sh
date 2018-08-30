@@ -5,6 +5,7 @@ cd $MPY_DIR
 make clean-frozen
 micropython -m upip install -p modules micropython-urequests
 micropython -m upip install -p modules micropython-umqtt.simple
+micropython -m upip install -p modules micropython-struct
 
 cd $PROJ_DIR
 
