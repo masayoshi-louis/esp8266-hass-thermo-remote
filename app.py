@@ -234,5 +234,5 @@ def adjust_display_brightness(sensor: TSL2561):
         if lux > 100:
             display.set_brightness(255)
         else:
-            display.set_brightness(lux)
+            display.set_brightness(int(lux))
         last_light_sensor_sample_ts = now
