@@ -237,7 +237,7 @@ def adjust_display_brightness(sensor: TSL2561):
         elif lux >= 20:
             b = 100
         else:
-            b = max(int(lux), 255)
+            b = min(int(lux), 255)
         if abs(current_display_brightness - b) > 15 or (b <= 10 < current_display_brightness):
             current_display_brightness = b
             display.set_brightness(b)
