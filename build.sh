@@ -15,6 +15,7 @@ cp -t ../micropython/ports/esp8266/modules \
   button.py \
   bme280.py \
   sht31.py \
+  tsl2561.py \
   hass.py \
   model.py \
   mqtt.py \
