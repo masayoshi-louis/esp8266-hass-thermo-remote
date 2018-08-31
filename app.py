@@ -232,7 +232,6 @@ def adjust_display_brightness(sensor: TSL2561):
     now = time.ticks_ms()
     if now - last_light_sensor_sample_ts > LIGHT_SENSOR_SAMPLE_INTERVAL:
         lux = sensor.read()
-        print("[LIGHT] {} lux".format(lux))
         if lux >= 40:
             b = 255
         elif lux >= 20:
@@ -242,4 +241,5 @@ def adjust_display_brightness(sensor: TSL2561):
         if abs(current_display_brightness - b) > 15:
             current_display_brightness = b
             display.set_brightness(b)
+            print("[LIGHT] {} lux, set display brightness to {}".format(lux, b))
         last_light_sensor_sample_ts = now
