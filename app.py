@@ -32,6 +32,7 @@ v_tim = None
 v_adc = machine.ADC(0)
 
 last_light_sensor_sample_ts = 0
+current_display_brightness = 255
 
 LIGHT_SENSOR_SAMPLE_INTERVAL = const(1000)
 
@@ -227,12 +228,16 @@ def push_voltage(sink):
 def adjust_display_brightness(sensor: TSL2561):
     from display import instance as display
     global last_light_sensor_sample_ts
+    global current_display_brightness
     now = time.ticks_ms()
     if now - last_light_sensor_sample_ts > LIGHT_SENSOR_SAMPLE_INTERVAL:
         lux = sensor.read()
         print("[LIGHT] {} lux".format(lux))
         if lux > 100:
-            display.set_brightness(255)
+            b = 255
         else:
-            display.set_brightness(int(lux))
+            b = int(lux)
+        if abs(current_display_brightness - b) > 15:
+            current_display_brightness = b
+            display.set_brightness(b)
         last_light_sensor_sample_ts = now
