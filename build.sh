@@ -25,7 +25,8 @@ cp -t ../micropython/ports/esp8266/modules \
   wifi.py \
   wifi_init.py \
   controller.py \
-  app.py
+  app.py \
+  display.py
 
 cp -r font ../micropython/ports/esp8266/modules
 
