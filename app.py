@@ -220,7 +220,7 @@ def voltage_updater(sink):
 
 def push_voltage(sink):
     raw = v_adc.read()
-    v = raw / 1024 * 5
+    v = raw / 1024 * 4.2
     print("[BATTERY] voltage = {0:.2f}v".format(v))
     sink.on_next(v)
 
