@@ -49,8 +49,8 @@ class Controller:
         # button actions
         self._mode_btn_loop(self.btn1)
         # TODO btn2
-        self._setpoint_up_btn_loop(self.btn3)
-        self._setpoint_down_btn_loop(self.btn4)
+        self._setpoint_down_btn_loop(self.btn3)
+        self._setpoint_up_btn_loop(self.btn4)
         # render view
         if self.refresh_display:
             self._render()
