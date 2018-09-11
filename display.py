@@ -90,7 +90,7 @@ class NormalView(View):
 
         wri_t_s = Writer(driver, freesans23, verbose=False)
         wri_t_s.set_clip(False, False, False)  # Char wrap
-        Writer.set_textpos(driver, 29 + ROW_OFFSET, 82)
+        Writer.set_textpos(driver, 29 + ROW_OFFSET, 85)
         wri_t_s.printstring(str(self.data.current_temperature)[-1:], invert=is_heating)
 
         if is_heating:
